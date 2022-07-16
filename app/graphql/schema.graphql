@@ -1,0 +1,426 @@
+type Query {
+    Movie(where: MovieFilter, order_by: [String!], skip: Int, limit:Int): MovieListResponse!
+    Movie_by_id(id: Int!): Movie!
+    User(where: UserFilter, order_by: [String!], skip: Int, limit:Int): UserListResponse!
+    User_by_id(id: Int!): User!
+    MoviePreview(where: MoviePreviewFilter, order_by: [String!], skip: Int, limit:Int): MoviePreviewListResponse!
+    MoviePreview_by_id(id: Int!): MoviePreview!
+    Category(where: CategoryFilter, order_by: [String!], skip: Int, limit:Int): CategoryListResponse!
+    Category_by_id(id: Int!): Category!
+    Author(where: AuthorFilter, order_by: [String!], skip: Int, limit:Int): AuthorListResponse!
+    Author_by_id(id: Int!): Author!
+    AuthorProfile(where: AuthorProfileFilter, order_by: [String!], skip: Int, limit:Int): AuthorProfileListResponse!
+    AuthorProfile_by_id(id: Int!): AuthorProfile!
+    Manager(where: ManagerFilter, order_by: [String!], skip: Int, limit:Int): ManagerListResponse!
+    Manager_by_id(id: Int!): Manager!
+}
+
+type Mutation {
+    Auth_me: User!
+    Auth_register(input: UserRegister): User!
+    Auth_login(input: LoginBody!): TokenResponse!
+    Auth_refreshToken(refresh_token: String!): TokenResponse!
+    create_Movie(input: MovieInput!): Movie!
+    update_Movie(id:Int!, input: MovieInput!): Movie!
+    patch_Movie(id:Int!, input: MoviePatch!): Movie!
+    delete_Movie(where: MovieFilter): Int
+    update_User(id:Int!, input: UserInput!): User!
+    patch_User(id:Int!, input: UserPatch!): User!
+    delete_User(where: UserFilter): Int
+    create_MoviePreview(input: MoviePreviewInput!): MoviePreview!
+    update_MoviePreview(id:Int!, input: MoviePreviewInput!): MoviePreview!
+    patch_MoviePreview(id:Int!, input: MoviePreviewPatch!): MoviePreview!
+    delete_MoviePreview(where: MoviePreviewFilter): Int
+    create_Category(input: CategoryInput!): Category!
+    update_Category(id:Int!, input: CategoryInput!): Category!
+    patch_Category(id:Int!, input: CategoryPatch!): Category!
+    delete_Category(where: CategoryFilter): Int
+    create_Author(input: AuthorInput!): Author!
+    update_Author(id:Int!, input: AuthorInput!): Author!
+    patch_Author(id:Int!, input: AuthorPatch!): Author!
+    delete_Author(where: AuthorFilter): Int
+    create_AuthorProfile(input: AuthorProfileInput!): AuthorProfile!
+    update_AuthorProfile(id:Int!, input: AuthorProfileInput!): AuthorProfile!
+    patch_AuthorProfile(id:Int!, input: AuthorProfilePatch!): AuthorProfile!
+    delete_AuthorProfile(where: AuthorProfileFilter): Int
+    create_Manager(input: ManagerInput!): Manager!
+    update_Manager(id:Int!, input: ManagerInput!): Manager!
+    patch_Manager(id:Int!, input: ManagerPatch!): Manager!
+    delete_Manager(where: ManagerFilter): Int
+}
+
+input LoginBody {
+    username: String!
+    password: String!
+}
+
+type TokenResponse {
+    access_token: String!
+    refresh_token: String!
+}
+
+type Movie {
+    id: Int!
+    name: String!
+    description: String
+    watch_count: Int
+    tags: [String!]
+    release_date: String
+    created_at: String
+    updated_at: String
+    preview: MoviePreview
+    category: Category
+    authors: [Author!]
+}
+
+input MovieInput {
+    name: String!
+    description: String
+    watch_count: Int
+    tags: [String!]
+    release_date: String
+}
+input MoviePatch {
+    name: String
+    description: String
+    watch_count: Int
+    tags: [String!]
+    release_date: String
+}
+type MovieListResponse {
+    total: Int!
+    items: [Movie!]!
+}
+
+input MovieFilter {
+    id: NumberFilter
+    name: StringFilter
+    description: StringFilter
+    watch_count: NumberFilter
+    release_date: DateFilter
+    created_at: DateTimeFilter
+    updated_at: DateTimeFilter
+    preview: MoviePreviewFilter
+    category: CategoryFilter
+    authors: AuthorFilter
+    or: [MovieFilter!]
+    and: [MovieFilter!]
+    not: MovieFilter
+}
+
+type User {
+    id: Int!
+    username: String!
+    phonenumber: String
+    email: String
+    roles: [String!]
+    date_joined: String
+}
+
+input UserInput {
+    username: String!
+    phonenumber: String
+    email: String
+    roles: [String!]
+}
+input UserPatch {
+    username: String
+    phonenumber: String
+    email: String
+    roles: [String!]
+}
+input UserRegister{
+    username: String!
+    phonenumber: String
+    email: String
+    password: String!
+    roles: [String!]
+}
+type UserListResponse {
+    total: Int!
+    items: [User!]!
+}
+
+input UserFilter {
+    id: NumberFilter
+    username: StringFilter
+    phonenumber: StringFilter
+    email: StringFilter
+    password: StringFilter
+    date_joined: DateTimeFilter
+    or: [UserFilter!]
+    and: [UserFilter!]
+    not: UserFilter
+}
+
+type MoviePreview {
+    id: Int!
+    images: [FileInfo!]
+    tags: [String!]
+    movie: Movie
+}
+
+input MoviePreviewInput {
+    images: [Upload!]
+    tags: [String!]
+}
+input MoviePreviewPatch {
+    images: [Upload!]
+    tags: [String!]
+}
+type MoviePreviewListResponse {
+    total: Int!
+    items: [MoviePreview!]!
+}
+
+input MoviePreviewFilter {
+    id: NumberFilter
+    movie: MovieFilter
+    or: [MoviePreviewFilter!]
+    and: [MoviePreviewFilter!]
+    not: MoviePreviewFilter
+}
+
+type Category {
+    id: Int!
+    name: String!
+    description: String
+    image: FileInfo
+    movies: [Movie!]
+    parent: Category
+    childs: [Category!]
+}
+
+input CategoryInput {
+    name: String!
+    description: String
+    image: Upload
+}
+input CategoryPatch {
+    name: String
+    description: String
+    image: Upload
+}
+type CategoryListResponse {
+    total: Int!
+    items: [Category!]!
+}
+
+input CategoryFilter {
+    id: NumberFilter
+    name: StringFilter
+    description: StringFilter
+    parent: CategoryFilter
+    movies: MovieFilter
+    childs: CategoryFilter
+    or: [CategoryFilter!]
+    and: [CategoryFilter!]
+    not: CategoryFilter
+}
+
+type Author {
+    id: Int!
+    lastname: String!
+    firstname: String!
+    sex: Gender
+    birthday: String
+    wakeup_time: String
+    wakeup_day: String
+    created_at: String
+    updated_at: String
+    manager: Manager
+    profile: AuthorProfile
+    movies: [Movie!]
+    friends: [Author!]
+    friends_of: [Author!]
+}
+
+input AuthorInput {
+    lastname: String!
+    firstname: String!
+    sex: Gender
+    birthday: String
+    wakeup_time: String
+    wakeup_day: String
+}
+input AuthorPatch {
+    lastname: String
+    firstname: String
+    sex: Gender
+    birthday: String
+    wakeup_time: String
+    wakeup_day: String
+}
+type AuthorListResponse {
+    total: Int!
+    items: [Author!]!
+}
+
+input AuthorFilter {
+    id: NumberFilter
+    lastname: StringFilter
+    firstname: StringFilter
+    sex: StringFilter
+    birthday: DateFilter
+    wakeup_time: TimeFilter
+    wakeup_day: DateTimeFilter
+    created_at: DateTimeFilter
+    updated_at: DateTimeFilter
+    profile: AuthorProfileFilter
+    manager: ManagerFilter
+    movies: MovieFilter
+    friends: AuthorFilter
+    friends_of: AuthorFilter
+    or: [AuthorFilter!]
+    and: [AuthorFilter!]
+    not: AuthorFilter
+}
+
+type AuthorProfile {
+    id: Int!
+    file: FileInfo!
+    info: JSON
+    protected: Boolean!
+    author: Author
+}
+
+input AuthorProfileInput {
+    file: Upload!
+    info: JSON
+    protected: Boolean!
+}
+input AuthorProfilePatch {
+    file: Upload
+    info: JSON
+    protected: Boolean
+}
+type AuthorProfileListResponse {
+    total: Int!
+    items: [AuthorProfile!]!
+}
+
+input AuthorProfileFilter {
+    id: NumberFilter
+    protected: BooleanFilter
+    author: AuthorFilter
+    or: [AuthorProfileFilter!]
+    and: [AuthorProfileFilter!]
+    not: AuthorProfileFilter
+}
+
+type Manager {
+    id: Int!
+    lastname: String!
+    firstname: String!
+    authors: [Author!]
+}
+
+input ManagerInput {
+    lastname: String!
+    firstname: String!
+}
+input ManagerPatch {
+    lastname: String
+    firstname: String
+}
+type ManagerListResponse {
+    total: Int!
+    items: [Manager!]!
+}
+
+input ManagerFilter {
+    id: NumberFilter
+    lastname: StringFilter
+    firstname: StringFilter
+    authors: AuthorFilter
+    or: [ManagerFilter!]
+    and: [ManagerFilter!]
+    not: ManagerFilter
+}
+
+
+
+enum Gender {
+    unknown
+    male
+    female
+}
+type FileInfo {
+    path: String
+    filename: String
+    content_type: String
+}
+
+scalar Upload
+scalar JSON
+input BooleanFilter {
+  is: Boolean
+}
+
+input NumberFilter {
+    eq: Float
+    ge: Float
+    gt: Float
+    le: Float
+    lt: Float
+    contains: String
+    between:[Float!]
+    in: [Float!]
+    not_in:  [Float!]
+    neq: Float
+    is: Float
+}
+
+input StringFilter {
+    eq: String
+    like: String
+    not_like: String
+    ilike: String
+    not_ilike: String
+    in_: [String!]
+    not_in: [String!]
+    contains: String
+    startsWith: String
+    endsWith: String
+    neq: String
+}
+
+input TimeFilter {
+    eq: String
+    ge: String
+    gt: String
+    le: String
+    lt: String
+    between:[String!]
+    in: [String!]
+    not_in:  [String!]
+    neq: String
+    is: String
+}
+
+input DateTimeFilter {
+    eq: String
+    ge: String
+    gt: String
+    le: String
+    lt: String
+    between:[String!]
+    in: [String!]
+    not_in:  [String!]
+    neq: String
+    is: String
+}
+
+input DateFilter {
+    eq: String
+    ge: String
+    gt: String
+    le: String
+    lt: String
+    between:[String!]
+    in: [String!]
+    not_in:  [String!]
+    neq: String
+    is: String
+}
+

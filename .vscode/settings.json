@@ -1,0 +1,20 @@
+{
+  "files.exclude": {
+    "**/__pycache__": true
+  },
+  "files.associations": {
+    "*.html": "jinja-html"
+  },
+  "python.formatting.provider": "black",
+  "beautify.language": {
+    "js": {
+      "type": ["javascript"],
+      "filename": [".jshintrc", ".jsbeautifyrc"]
+      // "ext": ["js", "json"]
+      // ^^ to set extensions to be beautified using the javascript beautifier
+    },
+    "css": ["css", "scss"],
+    "html": ["htm", "html", "django-html", "jinja-html"]
+    // ^^ providing just an array sets the VS Code file type
+  }
+}

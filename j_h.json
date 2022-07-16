@@ -1,0 +1,14 @@
+{
+  "id": {
+    "type": "num"
+  },
+  "name": {
+    "type": "string"
+  },
+  "description": {
+    "type": "string"
+  },
+  "image": {
+    "type": "image"
+  }
+}

@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "Netflix clone"
+version = "0.0.1.dev"
+description = "Video Streaming services"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+sqlmodel = "^0.0.6"
+fastapi = "^0.78.0"
+SQLAlchemy-Utils = "^0.38.2"
+alembic = {extras = ["tz"], version = "^1.8.0"}
+uvicorn = "^0.17.6"
+loguru = "^0.6.0"
+PyMySQL = {extras = ["rsa"], version = "^1.0.2"}
+Jinja2 = "^3.1.1"
+email-validator = "^1.1.3"
+phonenumbers = "^8.12.45"
+autoflake = "^1.4"
+psycopg2-binary = "^2.9.3"
+filedepot = "^0.8.0"
+python-multipart = "^0.0.5"
+querystring-parser = "^1.2.4"
+ariadne = "^0.15.0"
+passlib = "^1.7.4"
+python-jose = "^3.3.0"
+SQLAlchemy = "1.4.35"
+
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
