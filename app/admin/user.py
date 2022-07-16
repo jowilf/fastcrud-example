@@ -32,8 +32,9 @@ class UserAdmin(BaseAdminModel):
         special_chars="@&%$()=!?*+-.,:;",
         required=True,
     )
-    roles = StringField(is_array=True)
     date_joined = DateTimeField(exclude_from_create=True, exclude_from_edit=True)
+    roles = StringField(is_array=True)
+    is_superuser = StringField(exclude_from_create=True, exclude_from_edit=True)
 
     def __init__(self, rm: "RepositoryManager" = None):
         self.rm = rm

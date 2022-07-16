@@ -37,6 +37,15 @@ class User(UserRelationFields, UserBase, BaseSQLModel, table=True):
         None,
         sa_column=Column(DATETIME(timezone=True), nullable=False, default=func.now()),
     )
+    is_superuser: Optional[bool] = Field(False)
+
+    def has_permission(self, roles: List[str]) -> bool:
+        if "IS_SUPERUSER" in roles:
+            return self.is_superuser
+        for role in roles:
+            if role in self.roles:
+                return True
+        return False
 
 
 class UserInBase(UserBase):
@@ -77,6 +86,7 @@ class UserRelationsOut(BaseSQLModel):
 
 class UserOutWithoutRelations(UserBase, BaseSQLModel):
     date_joined: Optional[datetime]
+    is_superuser: Optional[bool] = False
 
 
 class UserOut(UserRelationsOut, UserOutWithoutRelations, metaclass=AllOptional):

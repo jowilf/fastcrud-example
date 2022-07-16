@@ -113,7 +113,6 @@ type User {
     username: String!
     phonenumber: String
     email: String
-    roles: [String!]
     date_joined: String
 }
 
@@ -121,20 +120,17 @@ input UserInput {
     username: String!
     phonenumber: String
     email: String
-    roles: [String!]
 }
 input UserPatch {
     username: String
     phonenumber: String
     email: String
-    roles: [String!]
 }
 input UserRegister{
     username: String!
     phonenumber: String
     email: String
     password: String!
-    roles: [String!]
 }
 type UserListResponse {
     total: Int!
