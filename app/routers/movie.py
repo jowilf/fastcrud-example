@@ -16,6 +16,8 @@ from app.models.author import Author, AuthorInBase, AuthorOutWithoutRelations
 from app.models.category import CategoryOutWithoutRelations
 from app.models.movie import MovieIn, MovieOut, MoviePatchBody
 from app.models.movie_preview import MoviePreviewOutWithoutRelations
+from app.models.user import User
+from app.services.auth import authorize
 
 router = APIRouter(prefix="/api/movies", tags=["movies-controller"])
 
@@ -33,6 +35,7 @@ async def list_all(
     order_by: MovieOrderBy = Depends(),
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["user"])),
 ):
     total = response.headers["x-total-count"] = "%s" % repository.movie.find_all(
         pagination, MovieFilter.from_query(request), order_by, True

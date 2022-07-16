@@ -5,7 +5,7 @@ from app.dependencies import repository_manager
 from app.internal.repository_manager import RepositoryManager
 from app.models.auth import LoginBody, TokenResponse
 from app.models.user import UserOut, UserRegister
-from app.services.auth import authenticated_user
+from app.services.auth import authorize
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     status_code=HTTP_201_CREATED,
     summary="Get connected User info",
 )
-async def me(user=Depends(authenticated_user())):
+async def me(user=Depends(authorize())):
     return user
 
 
