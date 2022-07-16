@@ -1,17 +1,17 @@
 from abc import abstractmethod
 import re
 from typing import Any, List, Optional, Type
-from fastapi import Depends, Request, Response, UploadFile
-from fastapi.responses import RedirectResponse
+from starlette.requests import Request
+from starlette.responses import RedirectResponse, Response, JSONResponse
 from jinja2 import pass_context
 from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from sqlmodel import Session
 
 from common.admin.models import AdminModel, AdminModelManager
 from starlette.templating import Jinja2Templates
 from starlette.datastructures import FormData
-from starlette.status import HTTP_200_OK
+from starlette.status import HTTP_200_OK, HTTP_422_UNPROCESSABLE_ENTITY
 from common.admin.helpers import get_file_icon
 
 
@@ -92,11 +92,14 @@ class Admin:
             if model.identity() == identity:
                 return model
 
-    async def _404(self, request: Request) -> Response:
+    async def _render_error(self, request: Request, code: str):
         return self.template.TemplateResponse(
-            "404.html",
-            {"request": request},
+            "error.html",
+            {"request": request, "code": code},
         )
+
+    async def _404(self, request: Request) -> Response:
+        return await self._render_error(request, "404")
 
     async def _list(self, request: Request, model: AdminModel) -> Response:
         return self.template.TemplateResponse(
@@ -170,16 +173,24 @@ class Admin:
         model_manager: AdminModelManager,
         login_required: bool = False,
     ) -> Response:
-        if login_required and not self.is_authenticated(request):
-            return await self._login(request)
-        model = self._find_model_from_identity(model_identity)
-        if model is not None:
-            if action == "list":
-                return await self._list(request, model)
-            elif action == "show":
-                return await self._show(request, model, pk, model_manager)
-            elif action == "create":
-                return await self._create(request, model, model_manager)
-            elif action == "edit":
-                return await self._edit(request, model, pk, model_manager)
-        return await self._404(request)
+        try:
+            if login_required and not self.is_authenticated(request):
+                return await self._login(request)
+            model = self._find_model_from_identity(model_identity)
+            if model is not None:
+                if action == "list":
+                    return await self._list(request, model)
+                elif action == "show":
+                    return await self._show(request, model, pk, model_manager)
+                elif action == "create":
+                    return await self._create(request, model, model_manager)
+                elif action == "edit":
+                    return await self._edit(request, model, pk, model_manager)
+            return await self._404(request)
+        except ValidationError as exc:
+            return JSONResponse(
+                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                content={"detail": exc.errors()},
+            )
+        except:
+            return await self._render_error(request, "500")
