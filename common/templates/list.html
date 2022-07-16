@@ -1,168 +1,194 @@
-{% extends "layout.html" %}
-{% block header %}
-    <div class="d-flex justify-content-between align-items-center">
-        <h1>{{ model.get_name() }}</h1>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{{ admin_url()}}">Admin</a>
-            </li>
-            <li class="breadcrumb-item active">{{ model.get_name() }}</li>
-        </ol>
-    </div>
-{% endblock %}
-{% block modal %}
-    <div class="modal modal-blur fade"
-         id="modal-loading"
-         tabindex="-1"
-         role="dialog"
-         aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div class="d-flex justify-content-center">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <span class="ms-2">Loading...</span>
-                    </div>
-                </div>
-            </div>
+{% extends "layout.html" %} {% block header %}
+<div class="d-flex justify-content-between align-items-center">
+  <h1>{{ model.get_name() }}</h1>
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a href="{{ admin_url()}}">Admin</a>
+    </li>
+    <li class="breadcrumb-item active">{{ model.get_name() }}</li>
+  </ol>
+</div>
+{% endblock %} {% block modal %}
+<div
+  class="modal modal-blur fade"
+  id="modal-loading"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="d-flex justify-content-center">
+          <div class="spinner-border text-primary" role="status"></div>
+          <span class="ms-2">Loading...</span>
         </div>
+      </div>
     </div>
-    <div class="modal modal-blur fade"
-         id="modal-error"
-         tabindex="-1"
-         role="dialog"
-         aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                <div class="modal-status bg-danger"></div>
-                <div class="modal-body text-center py-4">
-                    <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="icon mb-2 text-danger icon-lg"
-                         width="24"
-                         height="24"
-                         viewBox="0 0 24 24"
-                         stroke-width="2"
-                         stroke="currentColor"
-                         fill="none"
-                         stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M12 9v2m0 4v.01" />
-                        <path
-                        d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
-                        />
-                    </svg>
-                    <h3>Something went wrong!</h3>
-                    <div id="error-body" class="text-muted"></div>
-                </div>
-            </div>
+  </div>
+</div>
+<div
+  class="modal modal-blur fade"
+  id="modal-error"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="modal"
+        aria-label="Close"
+      ></button>
+      <div class="modal-status bg-danger"></div>
+      <div class="modal-body text-center py-4">
+        <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="icon mb-2 text-danger icon-lg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M12 9v2m0 4v.01" />
+          <path
+            d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
+          />
+        </svg>
+        <h3>Something went wrong!</h3>
+        <div id="error-body" class="text-muted"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal modal-blur fade"
+  id="modal-delete"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="modal"
+        aria-label="Close"
+      ></button>
+      <div class="modal-status bg-danger"></div>
+      <div class="modal-body text-center py-4">
+        <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="icon mb-2 text-danger icon-lg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M12 9v2m0 4v.01" />
+          <path
+            d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
+          />
+        </svg>
+        <h3>Are you sure?</h3>
+        <div id="modal-delete-body" class="text-muted">
+          Do you really want to remove <span></span> ? This action cannot be
+          undone.
         </div>
-    </div>
-    <div class="modal modal-blur fade"
-         id="modal-delete"
-         tabindex="-1"
-         role="dialog"
-         aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                <div class="modal-status bg-danger"></div>
-                <div class="modal-body text-center py-4">
-                    <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="icon mb-2 text-danger icon-lg"
-                         width="24"
-                         height="24"
-                         viewBox="0 0 24 24"
-                         stroke-width="2"
-                         stroke="currentColor"
-                         fill="none"
-                         stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M12 9v2m0 4v.01" />
-                        <path
-                        d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
-                        />
-                    </svg>
-                    <h3>Are you sure?</h3>
-                    <div id="modal-delete-body" class="text-muted">
-                        Do you really want to remove <span></span> ? This action cannot be
-                        undone.
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <div class="w-100">
-                        <div class="row">
-                            <div class="col">
-                                <a href="#" class="btn w-100" data-bs-dismiss="modal">Cancel</a>
-                            </div>
-                            <div class="col">
-                                <div id="modal-delete-btn" href="#" class="btn btn-danger w-100">Delete</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      </div>
+      <div class="modal-footer">
+        <div class="w-100">
+          <div class="row">
+            <div class="col">
+              <a href="#" class="btn w-100" data-bs-dismiss="modal">Cancel</a>
             </div>
-        </div>
-    </div>
-{% endblock %}
-{% block content %}
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="container-fluid">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div id="dt_wrapper"></div>
-                                <div class="d-flex">
-                                    <button id="multi-delete-btn"
-                                            class="btn btn-danger btn-block me-2"
-                                            style="display: none">
-                                        <i class="fa-solid fa-trash me-2"></i>
-                                        (<span>0</span>)
-                                    </button>
-                                    <a href="{{ admin_url_for(model, 'create')}}"
-                                       class="btn btn-primary btn-block">
-                                        <i class="fa-solid fa-plus me-2"></i>
-                                        New {{ entity_name }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <table id="dt" class="table table-bordered table-vcenter text-nowrap">
-                            <thead class="thead-light">
-                                <tr id="table-header">
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
+            <div class="col">
+              <div id="modal-delete-btn" href="#" class="btn btn-danger w-100">
+                Delete
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
-{% endblock %}
-{% block link %}
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/date-1.1.2/r-2.3.0/sb-1.3.4/sl-1.4.0/datatables.min.css"/>
-{% endblock %}
-{% block script %}
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/date-1.1.2/r-2.3.0/sb-1.3.4/sl-1.4.0/datatables.min.js"></script>
-{% endblock %}
-{% block script_end %}
-    <script>
+  </div>
+</div>
+{% endblock %} {% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+              <div id="dt_wrapper"></div>
+              <div class="d-flex">
+                <button
+                  id="multi-delete-btn"
+                  class="btn btn-danger btn-block ms-2"
+                  style="display: none"
+                >
+                  <i class="fa-solid fa-trash me-2"></i>
+                  (<span>0</span>)
+                </button>
+                <a
+                  href="{{ admin_url_for(model, 'create')}}"
+                  class="btn btn-primary btn-block ms-2"
+                >
+                  <i class="fa-solid fa-plus me-2"></i>
+                  New {{ entity_name }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <table id="dt" class="table table-bordered table-vcenter text-nowrap">
+            <thead class="thead-light">
+              <tr id="table-header"></tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block link %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/date-1.1.2/r-2.3.0/sb-1.3.4/sl-1.4.0/datatables.min.css"
+/>
+{% endblock %} {% block script %}
+<script
+  type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"
+></script>
+<script
+  type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"
+></script>
+<script
+  type="text/javascript"
+  src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/date-1.1.2/r-2.3.0/sb-1.3.4/sl-1.4.0/datatables.min.js"
+></script>
+{% endblock %} {% block script_end %}
+<script>
   function get_file_icon(mimeType) {
     mapping = {
       image: "fa-file-image",
@@ -611,5 +637,11 @@
         $("#modal-delete").modal('show');
       })
   });
-    </script>
+</script>
+{% endblock %} {% block style %}
+<style>
+  .dropdown-toggle:after {
+    display: none;
+  }
+</style>
 {% endblock %}

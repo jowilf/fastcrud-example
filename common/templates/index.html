@@ -21,16 +21,10 @@
       rel="stylesheet"
       href="https://unpkg.com/@tabler/core@1.0.0-beta10/dist/css/tabler.min.css"
     />
-    <style>
-      body {
-      }
-
-      .dropdown-toggle:after {
-        display: none;
-      }
-    </style>
+    {% block style %}{% endblock %}
+    
   </head>
-  <body class="hold-transition sidebar-mini">
+  <body class="">
     {% block body %}{% endblock %} {% block modal %}{% endblock %}
     <!-- JavaScript Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3/moment.min.js"></script>
