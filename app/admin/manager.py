@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
-from common.admin import HasMany, TextField
+from common.admin import HasMany, NumberField, TextField
 from starlette.datastructures import FormData
 
 from app.internal.base_models import BaseAdminModel
@@ -11,9 +11,15 @@ if TYPE_CHECKING:
 
 
 class ManagerAdmin(BaseAdminModel):
+    id = NumberField(
+        exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
+    )
     lastname = TextField(required=True)
     firstname = TextField(required=True)
     authors = HasMany(identity="author")
+
+    def __init__(self, rm: "RepositoryManager" = None):
+        self.rm = rm
 
     def get_name(self) -> str:
         return "Manager"
@@ -24,21 +30,21 @@ class ManagerAdmin(BaseAdminModel):
     def datasource(self) -> str:
         return "api:managers"
 
-    def find_by_id(self, rm: "RepositoryManager", id) -> Optional[Manager]:
-        return rm.manager.find_by_id(id, False)
+    def find_by_pk(self, id) -> Optional[Manager]:
+        return self.rm.manager.find_by_id(id, False)
 
-    def create(self, rm: "RepositoryManager", form_data: FormData):
+    def create(self, form_data: FormData):
         _data = self._extract_fields(form_data)
         manager_in = ManagerIn(**_data)
         manager = Manager(**manager_in.dict())
         if len(_data["authors"]) > 0:
-            manager.authors = rm.author.find_by_ids(_data["authors"])
-        rm.manager.save(manager)
+            manager.authors = self.rm.author.find_by_ids(_data["authors"])
+        self.rm.manager.save(manager)
 
-    def edit(self, rm: "RepositoryManager", form_data: FormData, id):
+    def edit(self, form_data: FormData, id):
         _data = self._extract_fields(form_data, True)
-        manager = rm.manager.find_by_id(id)
+        manager = self.rm.manager.find_by_id(id)
         manager_in = ManagerPatchBody(**_data)
         manager.update(manager_in.dict())
-        manager.authors = rm.author.find_by_ids(_data["authors"])
-        rm.manager.save(manager)
+        manager.authors = self.rm.author.find_by_ids(_data["authors"])
+        self.rm.manager.save(manager)

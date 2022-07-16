@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class BaseField(BaseModel):
-    type: Optional[str] = None
+    type: Optional[str] = "string"
     format: Optional[str] = None
     required: Optional[bool] = False
     is_array: Optional[bool] = False

@@ -1,6 +1,5 @@
 from .main import Admin as Admin
 from .models import AdminModel as AdminModel
-from .main import AdminModelManager as AdminModelManager
 from .fields import BooleanField as BooleanField
 from .fields import DateField as DateField
 from .fields import DateTimeField as DateTimeField

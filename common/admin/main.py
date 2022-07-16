@@ -8,7 +8,7 @@ from loguru import logger
 from pydantic import BaseModel, ValidationError
 from sqlmodel import Session
 
-from common.admin.models import AdminModel, AdminModelManager
+from common.admin.models import AdminModel
 from starlette.templating import Jinja2Templates
 from starlette.datastructures import FormData
 from starlette.status import HTTP_200_OK, HTTP_422_UNPROCESSABLE_ENTITY
@@ -108,21 +108,21 @@ class Admin:
         )
 
     async def _show(
-        self, request: Request, model: AdminModel, pk, model_manager: AdminModelManager
+        self, request: Request, model: AdminModel, pk
     ) -> Response:
-        if pk is None or model_manager.find_by_pk(model, pk) is None:
+        if pk is None or  model.find_by_pk(pk) is None:
             return await self._404(request)
         return self.template.TemplateResponse(
             "show.html",
             {
                 "request": request,
                 "model": model,
-                "value": model_manager.find_by_pk(model, pk),
+                "value": model.find_by_pk(pk),
             },
         )
 
     async def _create(
-        self, request: Request, model: AdminModel, model_manager: AdminModelManager
+        self, request: Request, model: AdminModel
     ) -> Response:
         if request.method == "GET":
             return self.template.TemplateResponse(
@@ -134,13 +134,13 @@ class Admin:
             )
         elif request.method == "POST":
             form = await request.form()
-            model_manager.create(model, form)
+            model.create(form)
             return Response(status_code=HTTP_200_OK)
 
     async def _edit(
-        self, request: Request, model: AdminModel, pk, model_manager: AdminModelManager
+        self, request: Request, model: AdminModel, pk
     ) -> Response:
-        if pk is None or model_manager.find_by_pk(model, pk) is None:
+        if pk is None or model.find_by_pk(pk) is None:
             return await self._404(request)
         if request.method == "GET":
             return self.template.TemplateResponse(
@@ -148,12 +148,12 @@ class Admin:
                 {
                     "request": request,
                     "model": model,
-                    "value": model_manager.find_by_pk(model, pk),
+                    "value": model.find_by_pk(pk),
                 },
             )
         elif request.method == "POST":
             form = await request.form()
-            model_manager.edit(model, form, pk)
+            model.edit(form, pk)
             return Response(status_code=HTTP_200_OK)
 
     async def render_login(
@@ -167,30 +167,29 @@ class Admin:
     async def render_dashboard(
         self,
         request: Request,
-        model_identity: Optional[str],
+        model: AdminModel,
         action: Optional[str],
         pk: Any,
-        model_manager: AdminModelManager,
         login_required: bool = False,
     ) -> Response:
         try:
             if login_required and not self.is_authenticated(request):
                 return await self._login(request)
-            model = self._find_model_from_identity(model_identity)
             if model is not None:
                 if action == "list":
                     return await self._list(request, model)
                 elif action == "show":
-                    return await self._show(request, model, pk, model_manager)
+                    return await self._show(request, model, pk)
                 elif action == "create":
-                    return await self._create(request, model, model_manager)
+                    return await self._create(request, model)
                 elif action == "edit":
-                    return await self._edit(request, model, pk, model_manager)
+                    return await self._edit(request, model, pk)
             return await self._404(request)
         except ValidationError as exc:
             return JSONResponse(
                 status_code=HTTP_422_UNPROCESSABLE_ENTITY,
                 content={"detail": exc.errors()},
             )
-        except:
-            return await self._render_error(request, "500")
+        # except Exception as e:
+        #     logger.exception(e)
+        #     return await self._render_error(request, "500")

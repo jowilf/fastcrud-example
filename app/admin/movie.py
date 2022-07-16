@@ -12,6 +12,9 @@ if TYPE_CHECKING:
 
 
 class MovieAdmin(BaseAdminModel):
+    id = NumberField(
+        exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
+    )
     name = StringField(required=True)
     description = TextField()
     watch_count = NumberField()
@@ -23,6 +26,9 @@ class MovieAdmin(BaseAdminModel):
     category = HasOne(identity="category")
     authors = HasMany(identity="author")
 
+    def __init__(self, rm: "RepositoryManager" = None):
+        self.rm = rm
+
     def get_name(self) -> str:
         return "Movie"
 
@@ -32,38 +38,38 @@ class MovieAdmin(BaseAdminModel):
     def datasource(self) -> str:
         return "api:movies"
 
-    def find_by_id(self, rm: "RepositoryManager", id) -> Optional[Movie]:
-        return rm.movie.find_by_id(id, False)
+    def find_by_pk(self, id) -> Optional[Movie]:
+        return self.rm.movie.find_by_id(id, False)
 
-    def create(self, rm: "RepositoryManager", form_data: FormData):
+    def create(self, form_data: FormData):
         _data = self._extract_fields(form_data)
         movie_in = MovieIn(**_data)
         movie = Movie(**movie_in.dict())
         if _data["preview"] is not None:
-            preview = rm.movie_preview.find_by_id(_data["preview"])
+            preview = self.rm.movie_preview.find_by_id(_data["preview"])
             preview.movie_id = movie.id
         if _data["category"] is not None:
-            movie.category_id = rm.category.find_by_id(_data["category"]).id
+            movie.category_id = self.rm.category.find_by_id(_data["category"]).id
         if len(_data["authors"]) > 0:
-            movie.authors = rm.author.find_by_ids(_data["authors"])
-        rm.movie.save(movie)
+            movie.authors = self.rm.author.find_by_ids(_data["authors"])
+        self.rm.movie.save(movie)
 
-    def edit(self, rm: "RepositoryManager", form_data: FormData, id):
+    def edit(self, form_data: FormData, id):
         _data = self._extract_fields(form_data, True)
-        movie = rm.movie.find_by_id(id)
+        movie = self.rm.movie.find_by_id(id)
         movie_in = MoviePatchBody(**_data)
         movie.update(movie_in.dict())
         if _data["preview"] is not None:
-            preview = rm.movie_preview.find_by_id(_data["preview"])
+            preview = self.rm.movie_preview.find_by_id(_data["preview"])
             if movie.preview is not None:
                 movie.preview = None
-                rm.save(movie)
+                self.rm.save(movie)
             preview.movie_id = movie.id
         else:
             movie.preview = None
         if _data["category"] is not None:
-            movie.category_id = rm.category.find_by_id(_data["category"]).id
+            movie.category_id = self.rm.category.find_by_id(_data["category"]).id
         else:
             movie.category = None
-        movie.authors = rm.author.find_by_ids(_data["authors"])
-        rm.movie.save(movie)
+        movie.authors = self.rm.author.find_by_ids(_data["authors"])
+        self.rm.movie.save(movie)

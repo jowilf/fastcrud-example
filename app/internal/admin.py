@@ -1,11 +1,9 @@
 from typing import Optional
 
 from common.admin import Admin as BaseAdmin
-from common.admin import AdminModelManager as BaseAdminModelManager
 from fastapi import Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from jose import JWTError
-from starlette.datastructures import FormData
 
 from app.admin.author import AuthorAdmin
 from app.admin.author_profile import AuthorProfileAdmin
@@ -19,20 +17,6 @@ from app.dependencies import repository_manager
 from app.internal.base_models import BaseAdminModel
 from app.internal.repository_manager import RepositoryManager
 from app.models.auth import LoginBody
-
-
-class AdminModelManager(BaseAdminModelManager):
-    def __init__(self, rm: RepositoryManager) -> None:
-        self.rm = rm
-
-    def find_by_pk(self, model: BaseAdminModel, id):
-        return model.find_by_id(self.rm, id)
-
-    def create(self, model: BaseAdminModel, form_data: FormData):
-        model.create(self.rm, form_data)
-
-    def edit(self, model: BaseAdminModel, form_data: FormData, id):
-        model.edit(self.rm, form_data, id)
 
 
 class Admin(BaseAdmin):
@@ -118,12 +102,10 @@ class Admin(BaseAdmin):
             )
         if action is None:
             return RedirectResponse(request.url.include_query_params(action="list"))
+        model = self._find_model_from_identity(model)
+        model.rm = rm
         return await super().render_dashboard(
-            request=request,
-            model_identity=model,
-            action=action,
-            pk=id,
-            model_manager=AdminModelManager(rm),
+            request=request, model=model, action=action, pk=id
         )
 
 

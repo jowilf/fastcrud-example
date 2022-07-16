@@ -1,14 +1,13 @@
-from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from common.admin import AdminModel, NumberField
+from common.admin import AdminModel
 from common.types import FileInfo
 from sqlalchemy import MetaData
 from sqlmodel import Field, SQLModel
 from starlette.datastructures import FormData, UploadFile
 
 if TYPE_CHECKING:
-    from .repository_manager import RepositoryManager
+    pass
 
 
 class BaseTable(SQLModel):
@@ -33,24 +32,8 @@ class BaseSQLModel(BaseTable):
 
 
 class BaseAdminModel(AdminModel):
-    id = NumberField(
-        exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
-    )
-
     def pk(self) -> str:
         return "id"
-
-    @abstractmethod
-    def find_by_id(self, rm: "RepositoryManager", id):
-        pass
-
-    @abstractmethod
-    def create(self, rm: "RepositoryManager", form_data: FormData):
-        pass
-
-    @abstractmethod
-    def edit(self, rm: "RepositoryManager", form_data: FormData, id):
-        pass
 
     def _extract_fields(
         self, form_data: FormData, is_edit: bool = False
