@@ -1,25 +1,22 @@
 from typing import Optional, Set
 
-from fastapi import (APIRouter, Depends, HTTPException, Path, Query, Request,
-                     Response)
+from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from pydantic import Json
-from starlette.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
-                              HTTP_409_CONFLICT)
+from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.dependencies import repository_manager
 from app.filters.user import UserFilter, UserOrderBy
 from app.internal.filters import PaginationQuery
 from app.internal.repository_manager import RepositoryManager
 from app.internal.response import PaginatedData
-from app.models.user import User, UserIn, UserOut, UserPatchBody, UserRegister
-from app.services.password import hash_password
+from app.models.user import UserIn, UserOut, UserPatchBody, UserRegister
 
 router = APIRouter(prefix="/api/users", tags=["users-controller"])
 
 
 @router.get(
     "",
-    name="api:users",
+    name="users:list",
     response_model=PaginatedData[UserOut],
     summary="Query all User records",
 )
@@ -31,7 +28,7 @@ async def list_all(
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
 ):
-    total = response.headers["x-total-count"] = "%s" % repository.user.find_all(
+    total = repository.user.find_all(
         pagination, UserFilter.from_query(request), order_by, True
     )
     items = repository.user.find_all(
@@ -40,7 +37,7 @@ async def list_all(
     return PaginatedData(items=[UserOut.from_orm(item) for item in items], total=total)
 
 
-@router.get("/{id}", response_model=UserOut, summary="Get User by id")
+@router.get("/{id}", name="users:get", response_model=UserOut, summary="Get User by id")
 async def get_by_id(
     id: int = Path(...),
     exclude: Set[str] = Query({}),
@@ -50,20 +47,22 @@ async def get_by_id(
 
 
 @router.post(
-    "", response_model=UserOut, status_code=HTTP_201_CREATED, summary="Create new User"
+    "",
+    name="users:create",
+    response_model=UserOut,
+    status_code=HTTP_201_CREATED,
+    summary="Create new User",
 )
 async def create_new_user(
-    user_in: UserRegister, repository: RepositoryManager = Depends(repository_manager)
+    user_in: UserRegister,
+    repository: RepositoryManager = Depends(repository_manager),
 ):
-    user = repository.user.find_one(UserFilter(username=user_in.username))
-    if user is not None:
-        raise HTTPException(HTTP_409_CONFLICT, f"username already exist.")
-    user_in.password = hash_password(user_in.password)
-    user = User(**user_in.dict())
-    return repository.save(user)
+    return repository.user.create(user_in)
 
 
-@router.put("/{id}", response_model=UserOut, summary="Update User by id")
+@router.put(
+    "/{id}", name="users:update", response_model=UserOut, summary="Update User by id"
+)
 async def update(
     user_in: UserIn,
     id: int = Path(...),
@@ -72,7 +71,12 @@ async def update(
     return repository.user.update(id, user_in)
 
 
-@router.patch("/{id}", response_model=UserOut, summary="Partial Update User by id")
+@router.patch(
+    "/{id}",
+    name="users:patch",
+    response_model=UserOut,
+    summary="Partial Update User by id",
+)
 async def patch_update(
     user_in: UserPatchBody,
     id: int = Path(...),
@@ -81,7 +85,12 @@ async def patch_update(
     return repository.user.patch(id, user_in)
 
 
-@router.delete("", status_code=HTTP_204_NO_CONTENT, summary="Delete User by id")
+@router.delete(
+    "",
+    name="users:delete",
+    status_code=HTTP_204_NO_CONTENT,
+    summary="Delete User by id",
+)
 async def delete_user(
     request: Request,
     where: Optional[Json] = Query(None),

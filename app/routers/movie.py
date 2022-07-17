@@ -24,7 +24,7 @@ router = APIRouter(prefix="/api/movies", tags=["movies-controller"])
 
 @router.get(
     "",
-    name="api:movies",
+    name="movies:list",
     response_model=PaginatedData[MovieOut],
     summary="Query all Movie records",
 )
@@ -35,9 +35,9 @@ async def list_all(
     order_by: MovieOrderBy = Depends(),
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
-    user: User = Depends(authorize(["user"])),
+    user: User = Depends(authorize(["movie:view"])),
 ):
-    total = response.headers["x-total-count"] = "%s" % repository.movie.find_all(
+    total = repository.movie.find_all(
         pagination, MovieFilter.from_query(request), order_by, True
     )
     items = repository.movie.find_all(
@@ -46,50 +46,71 @@ async def list_all(
     return PaginatedData(items=[MovieOut.from_orm(item) for item in items], total=total)
 
 
-@router.get("/{id}", response_model=MovieOut, summary="Get Movie by id")
+@router.get(
+    "/{id}", name="movies:get", response_model=MovieOut, summary="Get Movie by id"
+)
 async def get_by_id(
     id: int = Path(...),
     exclude: Set[str] = Query({}),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:view"])),
 ):
     return repository.movie.find_by_id(id)
 
 
 @router.post(
     "",
+    name="movies:create",
     response_model=MovieOut,
     status_code=HTTP_201_CREATED,
     summary="Create new Movie",
 )
 async def create_new(
-    movie_in: MovieIn, repository: RepositoryManager = Depends(repository_manager)
+    movie_in: MovieIn,
+    repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:create"])),
 ):
     return repository.movie.create(movie_in)
 
 
-@router.put("/{id}", response_model=MovieOut, summary="Update Movie by id")
+@router.put(
+    "/{id}", name="movies:update", response_model=MovieOut, summary="Update Movie by id"
+)
 async def update(
     movie_in: MovieIn,
     id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:edit"])),
 ):
     return repository.movie.update(id, movie_in)
 
 
-@router.patch("/{id}", response_model=MovieOut, summary="Partial Update Movie by id")
+@router.patch(
+    "/{id}",
+    name="movies:patch",
+    response_model=MovieOut,
+    summary="Partial Update Movie by id",
+)
 async def patch_update(
     movie_in: MoviePatchBody,
     id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:edit"])),
 ):
     return repository.movie.patch(id, movie_in)
 
 
-@router.delete("", status_code=HTTP_204_NO_CONTENT, summary="Delete Movie by id")
+@router.delete(
+    "",
+    name="movies:delete",
+    status_code=HTTP_204_NO_CONTENT,
+    summary="Delete Movie by id",
+)
 async def delete_movie(
     request: Request,
     where: Optional[Json] = Query(None),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:delete"])),
 ):
     repository.movie.delete(MovieFilter.from_query(request))
     return Response(status_code=HTTP_204_NO_CONTENT)
@@ -97,11 +118,14 @@ async def delete_movie(
 
 @router.get(
     "/{id}/preview",
+    name="movies:preview:get",
     response_model=MoviePreviewOutWithoutRelations,
     summary="Get linked preview(MoviePreview)",
 )
 async def get_preview(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie_preview:view"])),
 ):
     movie = repository.movie.find_by_id(id)
     if movie.preview is None:
@@ -111,13 +135,15 @@ async def get_preview(
 
 @router.put(
     "/{id}/preview/{preview_id}",
+    name="movies:preview:put",
     response_model=MoviePreviewOutWithoutRelations,
-    summary="Linked with existing preview(MoviePreview)",
+    summary="Linked with preview(MoviePreview) by id",
 )
 async def link_preview(
     id: int = Path(...),
     preview_id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:edit"])),
 ):
     movie = repository.movie.find_by_id(id)
     preview = repository.movie_preview.find_by_id(preview_id)
@@ -130,11 +156,14 @@ async def link_preview(
 
 @router.delete(
     "/{id}/preview",
+    name="movies:preview:delete",
     status_code=HTTP_204_NO_CONTENT,
     summary="Delete linked preview(MoviePreview)",
 )
 async def delete_preview(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:edit"])),
 ):
     movie = repository.movie.find_by_id(id)
     movie.preview = None
@@ -144,11 +173,13 @@ async def delete_preview(
 
 @router.get(
     "/{id}/category",
+    name="movies:category:get",
     response_model=CategoryOutWithoutRelations,
     summary="Get linked category(Category)",
 )
 async def get_category(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     movie = repository.movie.find_by_id(id)
     if movie.category is None:
@@ -158,13 +189,15 @@ async def get_category(
 
 @router.put(
     "/{id}/category/{category_id}",
+    name="movies:category:put",
     response_model=CategoryOutWithoutRelations,
-    summary="Linked with existing category(Category)",
+    summary="Linked with category(Category) by id",
 )
 async def link_category(
     id: int = Path(...),
     category_id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:edit"])),
 ):
     movie = repository.movie.find_by_id(id)
     movie.category_id = repository.category.find_by_id(category_id).id
@@ -173,11 +206,14 @@ async def link_category(
 
 @router.delete(
     "/{id}/category",
+    name="movies:category:delete",
     status_code=HTTP_204_NO_CONTENT,
     summary="Delete linked category(Category)",
 )
 async def delete_category(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:edit"])),
 ):
     movie = repository.movie.find_by_id(id)
     movie.category = None
@@ -187,6 +223,7 @@ async def delete_category(
 
 @router.get(
     "/{id}/authors",
+    name="movies:authors:get",
     response_model=PaginatedData[AuthorOutWithoutRelations],
     summary="Get linked authors(Author)",
 )
@@ -211,6 +248,7 @@ async def get_authors(
 
 @router.post(
     "/{id}/authors",
+    name="movies:authors:add",
     response_model=AuthorOutWithoutRelations,
     status_code=HTTP_201_CREATED,
     summary="Add authors(Author)",
@@ -228,6 +266,7 @@ async def add_authors(
 
 @router.put(
     "/{id}/authors",
+    name="movies:authors:put",
     response_model=List[AuthorOutWithoutRelations],
     summary="Set authors(Author) by ids",
 )
@@ -235,6 +274,7 @@ async def set_existing_authors(
     ids: List[int],
     id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:edit"])),
 ):
     movie = repository.movie.find_by_id(id)
     movie.authors = repository.author.find_by_ids(ids)
@@ -244,6 +284,7 @@ async def set_existing_authors(
 
 @router.patch(
     "/{id}/authors",
+    name="movies:authors:patch",
     response_model=List[AuthorOutWithoutRelations],
     summary="Add authors(Author) by ids",
 )
@@ -251,6 +292,7 @@ async def add_existing_authors(
     ids: List[int],
     id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:edit"])),
 ):
     movie = repository.movie.find_by_id(id)
     movie.authors.extend(repository.author.find_by_ids(ids))

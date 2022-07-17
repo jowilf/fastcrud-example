@@ -32,7 +32,7 @@ class AuthorProfileAdmin(BaseAdminModel):
         return "author_profile"
 
     def datasource(self) -> str:
-        return "api:author_profiles"
+        return "author_profiles:list"
 
     def find_by_pk(self, id) -> Optional[AuthorProfile]:
         return self.rm.author_profile.find_by_id(id, False)

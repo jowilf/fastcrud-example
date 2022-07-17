@@ -40,7 +40,7 @@ class User(UserRelationFields, UserBase, BaseSQLModel, table=True):
     is_superuser: Optional[bool] = Field(False)
 
     def has_permission(self, roles: List[str]) -> bool:
-        if len(roles) == 0:
+        if self.is_superuser or len(roles) == 0:
             return True
         if "IS_SUPERUSER" in roles:
             return self.is_superuser

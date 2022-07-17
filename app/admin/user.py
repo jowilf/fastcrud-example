@@ -46,7 +46,7 @@ class UserAdmin(BaseAdminModel):
         return "user"
 
     def datasource(self) -> str:
-        return "api:users"
+        return "users:list"
 
     def find_by_pk(self, id) -> Optional[User]:
         return self.rm.user.find_by_id(id, False)

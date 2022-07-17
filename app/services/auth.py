@@ -1,36 +1,32 @@
 from typing import List, Optional
 
-from fastapi import Depends, HTTPException, Security, security
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
+from fastapi import Depends, HTTPException, security
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
-from app.config import config
 from app.dependencies import repository_manager
+from app.filters.user import UserFilter
 from app.internal.repository_manager import RepositoryManager
+from app.services.password import verify_password
 
-security = HTTPBearer()
+security = HTTPBasic()
 
 
 def authorize(roles: Optional[List[str]] = []):
     def auth_wrapper(
-        credentials: HTTPAuthorizationCredentials = Security(security),
+        credentials: HTTPBasicCredentials = Depends(security),
         repository: RepositoryManager = Depends(repository_manager),
     ):
-        try:
-            payload = jwt.decode(
-                credentials.credentials, config.jwt.secret, config.jwt.algorithm
-            )
-            if payload.get("type") != "access_token":
-                raise JWTError()
-            user = repository.user.find_by_id(payload.get("sub"))
-            if not user.has_permission(roles):
-                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=f"Access Forbidden")
-            return user
-        except JWTError as e:
+        user = repository.user.find_one(UserFilter(username=credentials.username))
+        if user is None or not verify_password(credentials.password, user.password):
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED,
                 detail=f"Invalid authentication credentials",
             )
+        if not user.has_permission(roles):
+            raise HTTPException(
+                status_code=HTTP_403_FORBIDDEN, detail=f"Access Forbidden"
+            )
+        return user
 
     return auth_wrapper

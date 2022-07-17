@@ -17,13 +17,15 @@ from app.models.author import (Author, AuthorIn, AuthorInBase, AuthorOut,
 from app.models.author_profile import AuthorProfileOutWithoutRelations
 from app.models.manager import ManagerOutWithoutRelations
 from app.models.movie import Movie, MovieInBase, MovieOutWithoutRelations
+from app.models.user import User
+from app.services.auth import authorize
 
 router = APIRouter(prefix="/api/authors", tags=["authors-controller"])
 
 
 @router.get(
     "",
-    name="api:authors",
+    name="authors:list",
     response_model=PaginatedData[AuthorOut],
     summary="Query all Author records",
 )
@@ -35,7 +37,7 @@ async def list_all(
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
 ):
-    total = response.headers["x-total-count"] = "%s" % repository.author.find_all(
+    total = repository.author.find_all(
         pagination, AuthorFilter.from_query(request), order_by, True
     )
     items = repository.author.find_all(
@@ -46,7 +48,9 @@ async def list_all(
     )
 
 
-@router.get("/{id}", response_model=AuthorOut, summary="Get Author by id")
+@router.get(
+    "/{id}", name="authors:get", response_model=AuthorOut, summary="Get Author by id"
+)
 async def get_by_id(
     id: int = Path(...),
     exclude: Set[str] = Query({}),
@@ -57,17 +61,24 @@ async def get_by_id(
 
 @router.post(
     "",
+    name="authors:create",
     response_model=AuthorOut,
     status_code=HTTP_201_CREATED,
     summary="Create new Author",
 )
 async def create_new(
-    author_in: AuthorIn, repository: RepositoryManager = Depends(repository_manager)
+    author_in: AuthorIn,
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     return repository.author.create(author_in)
 
 
-@router.put("/{id}", response_model=AuthorOut, summary="Update Author by id")
+@router.put(
+    "/{id}",
+    name="authors:update",
+    response_model=AuthorOut,
+    summary="Update Author by id",
+)
 async def update(
     author_in: AuthorIn,
     id: int = Path(...),
@@ -76,7 +87,12 @@ async def update(
     return repository.author.update(id, author_in)
 
 
-@router.patch("/{id}", response_model=AuthorOut, summary="Partial Update Author by id")
+@router.patch(
+    "/{id}",
+    name="authors:patch",
+    response_model=AuthorOut,
+    summary="Partial Update Author by id",
+)
 async def patch_update(
     author_in: AuthorPatchBody,
     id: int = Path(...),
@@ -85,7 +101,12 @@ async def patch_update(
     return repository.author.patch(id, author_in)
 
 
-@router.delete("", status_code=HTTP_204_NO_CONTENT, summary="Delete Author by id")
+@router.delete(
+    "",
+    name="authors:delete",
+    status_code=HTTP_204_NO_CONTENT,
+    summary="Delete Author by id",
+)
 async def delete_author(
     request: Request,
     where: Optional[Json] = Query(None),
@@ -97,11 +118,13 @@ async def delete_author(
 
 @router.get(
     "/{id}/manager",
+    name="authors:manager:get",
     response_model=ManagerOutWithoutRelations,
     summary="Get linked manager(Manager)",
 )
 async def get_manager(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     author = repository.author.find_by_id(id)
     if author.manager is None:
@@ -111,8 +134,9 @@ async def get_manager(
 
 @router.put(
     "/{id}/manager/{manager_id}",
+    name="authors:manager:put",
     response_model=ManagerOutWithoutRelations,
-    summary="Linked with existing manager(Manager)",
+    summary="Linked with manager(Manager) by id",
 )
 async def link_manager(
     id: int = Path(...),
@@ -126,11 +150,13 @@ async def link_manager(
 
 @router.delete(
     "/{id}/manager",
+    name="authors:manager:delete",
     status_code=HTTP_204_NO_CONTENT,
     summary="Delete linked manager(Manager)",
 )
 async def delete_manager(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     author = repository.author.find_by_id(id)
     author.manager = None
@@ -140,11 +166,13 @@ async def delete_manager(
 
 @router.get(
     "/{id}/profile",
+    name="authors:profile:get",
     response_model=AuthorProfileOutWithoutRelations,
     summary="Get linked profile(AuthorProfile)",
 )
 async def get_profile(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     author = repository.author.find_by_id(id)
     if author.profile is None:
@@ -154,8 +182,9 @@ async def get_profile(
 
 @router.put(
     "/{id}/profile/{profile_id}",
+    name="authors:profile:put",
     response_model=AuthorProfileOutWithoutRelations,
-    summary="Linked with existing profile(AuthorProfile)",
+    summary="Linked with profile(AuthorProfile) by id",
 )
 async def link_profile(
     id: int = Path(...),
@@ -173,11 +202,13 @@ async def link_profile(
 
 @router.delete(
     "/{id}/profile",
+    name="authors:profile:delete",
     status_code=HTTP_204_NO_CONTENT,
     summary="Delete linked profile(AuthorProfile)",
 )
 async def delete_profile(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     author = repository.author.find_by_id(id)
     author.profile = None
@@ -187,6 +218,7 @@ async def delete_profile(
 
 @router.get(
     "/{id}/movies",
+    name="authors:movies:get",
     response_model=PaginatedData[MovieOutWithoutRelations],
     summary="Get linked movies(Movie)",
 )
@@ -197,6 +229,7 @@ async def get_movies(
     order_by: MovieOrderBy = Depends(),
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:view"])),
 ):
     where = MovieFilter.from_query(request)
     if where is None:
@@ -211,6 +244,7 @@ async def get_movies(
 
 @router.post(
     "/{id}/movies",
+    name="authors:movies:add",
     response_model=MovieOutWithoutRelations,
     status_code=HTTP_201_CREATED,
     summary="Add movies(Movie)",
@@ -219,6 +253,7 @@ async def add_movies(
     movie_in: MovieInBase,
     id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:create"])),
 ):
     author = repository.author.find_by_id(id)
     new_movie = Movie(**movie_in.dict())
@@ -228,6 +263,7 @@ async def add_movies(
 
 @router.put(
     "/{id}/movies",
+    name="authors:movies:put",
     response_model=List[MovieOutWithoutRelations],
     summary="Set movies(Movie) by ids",
 )
@@ -244,6 +280,7 @@ async def set_existing_movies(
 
 @router.patch(
     "/{id}/movies",
+    name="authors:movies:patch",
     response_model=List[MovieOutWithoutRelations],
     summary="Add movies(Movie) by ids",
 )
@@ -260,6 +297,7 @@ async def add_existing_movies(
 
 @router.get(
     "/{id}/friends",
+    name="authors:friends:get",
     response_model=PaginatedData[AuthorOutWithoutRelations],
     summary="Get linked friends(Author)",
 )
@@ -284,6 +322,7 @@ async def get_friends(
 
 @router.post(
     "/{id}/friends",
+    name="authors:friends:add",
     response_model=AuthorOutWithoutRelations,
     status_code=HTTP_201_CREATED,
     summary="Add friends(Author)",
@@ -301,6 +340,7 @@ async def add_friends(
 
 @router.put(
     "/{id}/friends",
+    name="authors:friends:put",
     response_model=List[AuthorOutWithoutRelations],
     summary="Set friends(Author) by ids",
 )
@@ -317,6 +357,7 @@ async def set_existing_friends(
 
 @router.patch(
     "/{id}/friends",
+    name="authors:friends:patch",
     response_model=List[AuthorOutWithoutRelations],
     summary="Add friends(Author) by ids",
 )
@@ -333,6 +374,7 @@ async def add_existing_friends(
 
 @router.get(
     "/{id}/friends_of",
+    name="authors:friends_of:get",
     response_model=PaginatedData[AuthorOutWithoutRelations],
     summary="Get linked friends_of(Author)",
 )
@@ -357,6 +399,7 @@ async def get_friends_of(
 
 @router.post(
     "/{id}/friends_of",
+    name="authors:friends_of:add",
     response_model=AuthorOutWithoutRelations,
     status_code=HTTP_201_CREATED,
     summary="Add friends_of(Author)",
@@ -374,6 +417,7 @@ async def add_friends_of(
 
 @router.put(
     "/{id}/friends_of",
+    name="authors:friends_of:put",
     response_model=List[AuthorOutWithoutRelations],
     summary="Set friends_of(Author) by ids",
 )
@@ -390,6 +434,7 @@ async def set_existing_friends_of(
 
 @router.patch(
     "/{id}/friends_of",
+    name="authors:friends_of:patch",
     response_model=List[AuthorOutWithoutRelations],
     summary="Add friends_of(Author) by ids",
 )

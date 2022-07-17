@@ -32,7 +32,7 @@ class CategoryAdmin(BaseAdminModel):
         return "category"
 
     def datasource(self) -> str:
-        return "api:categories"
+        return "categories:list"
 
     def find_by_pk(self, id) -> Optional[Category]:
         return self.rm.category.find_by_id(id, False)

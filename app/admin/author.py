@@ -40,7 +40,7 @@ class AuthorAdmin(BaseAdminModel):
         return "author"
 
     def datasource(self) -> str:
-        return "api:authors"
+        return "authors:list"
 
     def find_by_pk(self, id) -> Optional[Author]:
         return self.rm.author.find_by_id(id, False)

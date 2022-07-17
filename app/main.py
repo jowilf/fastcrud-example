@@ -55,14 +55,7 @@ def create_app() -> FastAPI:
         methods=["GET", "POST"],
         include_in_schema=False,
     )
-    app.add_api_route(
-        "/admin/login",
-        admin.render_login,
-        name="admin_login",
-        methods=["GET", "POST"],
-        include_in_schema=False,
-    )
-    # app.include_router(AdminRouter)
+
     return app
 
 

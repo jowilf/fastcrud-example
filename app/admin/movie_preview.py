@@ -29,7 +29,7 @@ class MoviePreviewAdmin(BaseAdminModel):
         return "movie_preview"
 
     def datasource(self) -> str:
-        return "api:movie_previews"
+        return "movie_previews:list"
 
     def find_by_pk(self, id) -> Optional[MoviePreview]:
         return self.rm.movie_preview.find_by_id(id, False)

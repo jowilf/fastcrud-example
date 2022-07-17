@@ -18,13 +18,15 @@ from app.models.category import (Category, CategoryIn, CategoryInBase,
                                  CategoryOut, CategoryOutWithoutRelations,
                                  CategoryPatchBody, category_in_form)
 from app.models.movie import Movie, MovieInBase, MovieOutWithoutRelations
+from app.models.user import User
+from app.services.auth import authorize
 
 router = APIRouter(prefix="/api/categories", tags=["categories-controller"])
 
 
 @router.get(
     "",
-    name="api:categories",
+    name="categories:list",
     response_model=PaginatedData[CategoryOut],
     summary="Query all Category records",
 )
@@ -36,7 +38,7 @@ async def list_all(
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
 ):
-    total = response.headers["x-total-count"] = "%s" % repository.category.find_all(
+    total = repository.category.find_all(
         pagination, CategoryFilter.from_query(request), order_by, True
     )
     items = repository.category.find_all(
@@ -47,7 +49,12 @@ async def list_all(
     )
 
 
-@router.get("/{id}", response_model=CategoryOut, summary="Get Category by id")
+@router.get(
+    "/{id}",
+    name="categories:get",
+    response_model=CategoryOut,
+    summary="Get Category by id",
+)
 async def get_by_id(
     id: int = Path(...),
     exclude: Set[str] = Query({}),
@@ -58,6 +65,7 @@ async def get_by_id(
 
 @router.post(
     "",
+    name="categories:create",
     response_model=CategoryOut,
     status_code=HTTP_201_CREATED,
     summary="Create new Category",
@@ -69,7 +77,12 @@ async def create_new(
     return repository.category.create(category_in)
 
 
-@router.put("/{id}", response_model=CategoryOut, summary="Update Category by id")
+@router.put(
+    "/{id}",
+    name="categories:update",
+    response_model=CategoryOut,
+    summary="Update Category by id",
+)
 async def update(
     category_in: CategoryIn = Depends(category_in_form),
     id: int = Path(...),
@@ -79,7 +92,10 @@ async def update(
 
 
 @router.patch(
-    "/{id}", response_model=CategoryOut, summary="Partial Update Category by id"
+    "/{id}",
+    name="categories:patch",
+    response_model=CategoryOut,
+    summary="Partial Update Category by id",
 )
 async def patch_update(
     category_in: CategoryPatchBody,
@@ -90,7 +106,10 @@ async def patch_update(
 
 
 @router.put(
-    "/{id}/image", response_model=CategoryOut, summary="Update Category image by id"
+    "/{id}/image",
+    name="categories:image:update",
+    response_model=CategoryOut,
+    summary="Update Category image by id",
 )
 async def update_image(
     image: Optional[UploadFile] = File(None),
@@ -103,10 +122,14 @@ async def update_image(
 
 
 @router.delete(
-    "/{id}/image", status_code=HTTP_204_NO_CONTENT, summary="Delete Category image"
+    "/{id}/image",
+    name="categories:image:delete",
+    status_code=HTTP_204_NO_CONTENT,
+    summary="Delete Category image",
 )
 async def delete_image(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     category = repository.category.find_by_id(id)
     category.image = None
@@ -114,7 +137,12 @@ async def delete_image(
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
-@router.delete("", status_code=HTTP_204_NO_CONTENT, summary="Delete Category by id")
+@router.delete(
+    "",
+    name="categories:delete",
+    status_code=HTTP_204_NO_CONTENT,
+    summary="Delete Category by id",
+)
 async def delete_category(
     request: Request,
     where: Optional[Json] = Query(None),
@@ -126,11 +154,13 @@ async def delete_category(
 
 @router.get(
     "/{id}/parent",
+    name="categories:parent:get",
     response_model=CategoryOutWithoutRelations,
     summary="Get linked parent(Category)",
 )
 async def get_parent(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     category = repository.category.find_by_id(id)
     if category.parent is None:
@@ -140,8 +170,9 @@ async def get_parent(
 
 @router.put(
     "/{id}/parent/{parent_id}",
+    name="categories:parent:put",
     response_model=CategoryOutWithoutRelations,
-    summary="Linked with existing parent(Category)",
+    summary="Linked with parent(Category) by id",
 )
 async def link_parent(
     id: int = Path(...),
@@ -155,11 +186,13 @@ async def link_parent(
 
 @router.delete(
     "/{id}/parent",
+    name="categories:parent:delete",
     status_code=HTTP_204_NO_CONTENT,
     summary="Delete linked parent(Category)",
 )
 async def delete_parent(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     category = repository.category.find_by_id(id)
     category.parent = None
@@ -169,6 +202,7 @@ async def delete_parent(
 
 @router.get(
     "/{id}/movies",
+    name="categories:movies:get",
     response_model=PaginatedData[MovieOutWithoutRelations],
     summary="Get linked movies(Movie)",
 )
@@ -179,6 +213,7 @@ async def get_movies(
     order_by: MovieOrderBy = Depends(),
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:view"])),
 ):
     where = MovieFilter.from_query(request)
     if where is None:
@@ -193,6 +228,7 @@ async def get_movies(
 
 @router.post(
     "/{id}/movies",
+    name="categories:movies:add",
     response_model=MovieOutWithoutRelations,
     status_code=HTTP_201_CREATED,
     summary="Add movies(Movie)",
@@ -201,6 +237,7 @@ async def add_movies(
     movie_in: MovieInBase,
     id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:create"])),
 ):
     category = repository.category.find_by_id(id)
     new_movie = Movie(**movie_in.dict())
@@ -210,6 +247,7 @@ async def add_movies(
 
 @router.put(
     "/{id}/movies",
+    name="categories:movies:put",
     response_model=List[MovieOutWithoutRelations],
     summary="Set movies(Movie) by ids",
 )
@@ -226,6 +264,7 @@ async def set_existing_movies(
 
 @router.get(
     "/{id}/childs",
+    name="categories:childs:get",
     response_model=PaginatedData[CategoryOutWithoutRelations],
     summary="Get linked childs(Category)",
 )
@@ -251,6 +290,7 @@ async def get_childs(
 
 @router.post(
     "/{id}/childs",
+    name="categories:childs:add",
     response_model=CategoryOutWithoutRelations,
     status_code=HTTP_201_CREATED,
     summary="Add childs(Category)",
@@ -268,6 +308,7 @@ async def add_childs(
 
 @router.put(
     "/{id}/childs",
+    name="categories:childs:put",
     response_model=List[CategoryOutWithoutRelations],
     summary="Set childs(Category) by ids",
 )

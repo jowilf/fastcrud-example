@@ -28,7 +28,7 @@ class ManagerAdmin(BaseAdminModel):
         return "manager"
 
     def datasource(self) -> str:
-        return "api:managers"
+        return "managers:list"
 
     def find_by_pk(self, id) -> Optional[Manager]:
         return self.rm.manager.find_by_id(id, False)

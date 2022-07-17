@@ -36,7 +36,7 @@ class MovieAdmin(BaseAdminModel):
         return "movie"
 
     def datasource(self) -> str:
-        return "api:movies"
+        return "movies:list"
 
     def find_by_pk(self, id) -> Optional[Movie]:
         return self.rm.movie.find_by_id(id, False)

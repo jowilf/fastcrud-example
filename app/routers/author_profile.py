@@ -23,7 +23,7 @@ router = APIRouter(prefix="/api/author_profiles", tags=["author_profiles-control
 
 @router.get(
     "",
-    name="api:author_profiles",
+    name="author_profiles:list",
     response_model=PaginatedData[AuthorProfileOut],
     summary="Query all AuthorProfile records",
 )
@@ -35,9 +35,7 @@ async def list_all(
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
 ):
-    total = response.headers[
-        "x-total-count"
-    ] = "%s" % repository.author_profile.find_all(
+    total = repository.author_profile.find_all(
         pagination, AuthorProfileFilter.from_query(request), order_by, True
     )
     items = repository.author_profile.find_all(
@@ -48,7 +46,12 @@ async def list_all(
     )
 
 
-@router.get("/{id}", response_model=AuthorProfileOut, summary="Get AuthorProfile by id")
+@router.get(
+    "/{id}",
+    name="author_profiles:get",
+    response_model=AuthorProfileOut,
+    summary="Get AuthorProfile by id",
+)
 async def get_by_id(
     id: int = Path(...),
     exclude: Set[str] = Query({}),
@@ -59,6 +62,7 @@ async def get_by_id(
 
 @router.post(
     "",
+    name="author_profiles:create",
     response_model=AuthorProfileOut,
     status_code=HTTP_201_CREATED,
     summary="Create new AuthorProfile",
@@ -71,7 +75,10 @@ async def create_new(
 
 
 @router.put(
-    "/{id}", response_model=AuthorProfileOut, summary="Update AuthorProfile by id"
+    "/{id}",
+    name="author_profiles:update",
+    response_model=AuthorProfileOut,
+    summary="Update AuthorProfile by id",
 )
 async def update(
     author_profile_in: AuthorProfileIn = Depends(author_profile_in_form),
@@ -83,6 +90,7 @@ async def update(
 
 @router.patch(
     "/{id}",
+    name="author_profiles:patch",
     response_model=AuthorProfileOut,
     summary="Partial Update AuthorProfile by id",
 )
@@ -96,6 +104,7 @@ async def patch_update(
 
 @router.put(
     "/{id}/file",
+    name="author_profiles:file:update",
     response_model=AuthorProfileOut,
     summary="Update AuthorProfile file by id",
 )
@@ -110,10 +119,14 @@ async def update_file(
 
 
 @router.delete(
-    "/{id}/file", status_code=HTTP_204_NO_CONTENT, summary="Delete AuthorProfile file"
+    "/{id}/file",
+    name="author_profiles:file:delete",
+    status_code=HTTP_204_NO_CONTENT,
+    summary="Delete AuthorProfile file",
 )
 async def delete_file(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     author_profile = repository.author_profile.find_by_id(id)
     author_profile.file = None
@@ -122,7 +135,10 @@ async def delete_file(
 
 
 @router.delete(
-    "", status_code=HTTP_204_NO_CONTENT, summary="Delete AuthorProfile by id"
+    "",
+    name="author_profiles:delete",
+    status_code=HTTP_204_NO_CONTENT,
+    summary="Delete AuthorProfile by id",
 )
 async def delete_author_profile(
     request: Request,
@@ -135,11 +151,13 @@ async def delete_author_profile(
 
 @router.get(
     "/{id}/author",
+    name="author_profiles:author:get",
     response_model=AuthorOutWithoutRelations,
     summary="Get linked author(Author)",
 )
 async def get_author(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     author_profile = repository.author_profile.find_by_id(id)
     if author_profile.author is None:
@@ -149,8 +167,9 @@ async def get_author(
 
 @router.put(
     "/{id}/author/{author_id}",
+    name="author_profiles:author:put",
     response_model=AuthorOutWithoutRelations,
-    summary="Linked with existing author(Author)",
+    summary="Linked with author(Author) by id",
 )
 async def link_author(
     id: int = Path(...),
@@ -168,11 +187,13 @@ async def link_author(
 
 @router.delete(
     "/{id}/author",
+    name="author_profiles:author:delete",
     status_code=HTTP_204_NO_CONTENT,
     summary="Delete linked author(Author)",
 )
 async def delete_author(
-    id: int = Path(...), repository: RepositoryManager = Depends(repository_manager)
+    id: int = Path(...),
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     author_profile = repository.author_profile.find_by_id(id)
     author_profile.author = None

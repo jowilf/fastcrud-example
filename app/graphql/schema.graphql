@@ -18,8 +18,6 @@ type Query {
 type Mutation {
     Auth_me: User!
     Auth_register(input: UserRegister): User!
-    Auth_login(input: LoginBody!): TokenResponse!
-    Auth_refreshToken(refresh_token: String!): TokenResponse!
     create_Movie(input: MovieInput!): Movie!
     update_Movie(id:Int!, input: MovieInput!): Movie!
     patch_Movie(id:Int!, input: MoviePatch!): Movie!
@@ -49,15 +47,6 @@ type Mutation {
     delete_Manager(where: ManagerFilter): Int
 }
 
-input LoginBody {
-    username: String!
-    password: String!
-}
-
-type TokenResponse {
-    access_token: String!
-    refresh_token: String!
-}
 
 type Movie {
     id: Int!

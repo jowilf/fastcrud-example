@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/managers", tags=["managers-controller"])
 
 @router.get(
     "",
-    name="api:managers",
+    name="managers:list",
     response_model=PaginatedData[ManagerOut],
     summary="Query all Manager records",
 )
@@ -30,7 +30,7 @@ async def list_all(
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
 ):
-    total = response.headers["x-total-count"] = "%s" % repository.manager.find_all(
+    total = repository.manager.find_all(
         pagination, ManagerFilter.from_query(request), order_by, True
     )
     items = repository.manager.find_all(
@@ -41,7 +41,9 @@ async def list_all(
     )
 
 
-@router.get("/{id}", response_model=ManagerOut, summary="Get Manager by id")
+@router.get(
+    "/{id}", name="managers:get", response_model=ManagerOut, summary="Get Manager by id"
+)
 async def get_by_id(
     id: int = Path(...),
     exclude: Set[str] = Query({}),
@@ -52,17 +54,24 @@ async def get_by_id(
 
 @router.post(
     "",
+    name="managers:create",
     response_model=ManagerOut,
     status_code=HTTP_201_CREATED,
     summary="Create new Manager",
 )
 async def create_new(
-    manager_in: ManagerIn, repository: RepositoryManager = Depends(repository_manager)
+    manager_in: ManagerIn,
+    repository: RepositoryManager = Depends(repository_manager),
 ):
     return repository.manager.create(manager_in)
 
 
-@router.put("/{id}", response_model=ManagerOut, summary="Update Manager by id")
+@router.put(
+    "/{id}",
+    name="managers:update",
+    response_model=ManagerOut,
+    summary="Update Manager by id",
+)
 async def update(
     manager_in: ManagerIn,
     id: int = Path(...),
@@ -72,7 +81,10 @@ async def update(
 
 
 @router.patch(
-    "/{id}", response_model=ManagerOut, summary="Partial Update Manager by id"
+    "/{id}",
+    name="managers:patch",
+    response_model=ManagerOut,
+    summary="Partial Update Manager by id",
 )
 async def patch_update(
     manager_in: ManagerPatchBody,
@@ -82,7 +94,12 @@ async def patch_update(
     return repository.manager.patch(id, manager_in)
 
 
-@router.delete("", status_code=HTTP_204_NO_CONTENT, summary="Delete Manager by id")
+@router.delete(
+    "",
+    name="managers:delete",
+    status_code=HTTP_204_NO_CONTENT,
+    summary="Delete Manager by id",
+)
 async def delete_manager(
     request: Request,
     where: Optional[Json] = Query(None),
@@ -94,6 +111,7 @@ async def delete_manager(
 
 @router.get(
     "/{id}/authors",
+    name="managers:authors:get",
     response_model=PaginatedData[AuthorOutWithoutRelations],
     summary="Get linked authors(Author)",
 )
@@ -118,6 +136,7 @@ async def get_authors(
 
 @router.post(
     "/{id}/authors",
+    name="managers:authors:add",
     response_model=AuthorOutWithoutRelations,
     status_code=HTTP_201_CREATED,
     summary="Add authors(Author)",
@@ -135,6 +154,7 @@ async def add_authors(
 
 @router.put(
     "/{id}/authors",
+    name="managers:authors:put",
     response_model=List[AuthorOutWithoutRelations],
     summary="Set authors(Author) by ids",
 )
