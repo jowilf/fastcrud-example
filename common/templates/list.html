@@ -557,6 +557,7 @@
         $.ajax({
           url: "{{ ds(model)}}",
           type: "get",
+          headers: {{ajax_headers() | safe}},
           data: {
             skip: settings._iDisplayStart,
             limit: settings._iDisplayLength,
@@ -614,7 +615,8 @@
         $("#modal-loading").modal('show');
         var where = JSON.stringify({{'{'+model.pk()}}: { in: table.rows( { selected: true } ).ids().toArray()}})
         fetch(`{{ ds(model)}}?where=${where}`, {
-                    method: "DELETE"
+                    method: "DELETE",
+                    headers: {{ajax_headers() | safe}},
                 }).then(async response=>{
                   if(response.ok){
                     await new Promise(r => setTimeout(r, 500));

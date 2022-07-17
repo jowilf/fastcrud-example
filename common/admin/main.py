@@ -1,6 +1,6 @@
 from abc import abstractmethod
 import re
-from typing import Any, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response, JSONResponse
 from jinja2 import pass_context
@@ -49,6 +49,9 @@ class Admin:
     ) -> str:
         pass
 
+    def ajax_headers(self, request: Request) -> Dict[str, str]:
+        return {}
+
     def _create_template(self, title: str):
         template = Jinja2Templates("common/templates")
         template.env.globals["admin_title"] = title
@@ -78,10 +81,15 @@ class Admin:
         ) -> str:
             return self.admin_url_for(context["request"], model, action, pk)
 
+        @pass_context
+        def ajax_headers(context: dict) -> Dict[str, str]:
+            return self.ajax_headers(context["request"])
+
         template.env.globals["file_url"] = file_url
         template.env.globals["admin_url"] = admin_url
         template.env.globals["admin_url_for"] = admin_url_for
         template.env.globals["ds"] = ds
+        template.env.globals["ajax_headers"] = ajax_headers
         return template
 
     def register(self, model: AdminModel) -> None:
@@ -107,10 +115,8 @@ class Admin:
             {"request": request, "model": model},
         )
 
-    async def _show(
-        self, request: Request, model: AdminModel, pk
-    ) -> Response:
-        if pk is None or  model.find_by_pk(pk) is None:
+    async def _show(self, request: Request, model: AdminModel, pk) -> Response:
+        if pk is None or model.find_by_pk(pk) is None:
             return await self._404(request)
         return self.template.TemplateResponse(
             "show.html",
@@ -121,9 +127,7 @@ class Admin:
             },
         )
 
-    async def _create(
-        self, request: Request, model: AdminModel
-    ) -> Response:
+    async def _create(self, request: Request, model: AdminModel) -> Response:
         if request.method == "GET":
             return self.template.TemplateResponse(
                 "create.html",
@@ -137,9 +141,7 @@ class Admin:
             model.create(form)
             return Response(status_code=HTTP_200_OK)
 
-    async def _edit(
-        self, request: Request, model: AdminModel, pk
-    ) -> Response:
+    async def _edit(self, request: Request, model: AdminModel, pk) -> Response:
         if pk is None or model.find_by_pk(pk) is None:
             return await self._404(request)
         if request.method == "GET":
