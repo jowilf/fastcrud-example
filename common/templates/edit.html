@@ -50,7 +50,7 @@
                 data-tags="true"
                 multiple="multiple"
               > {% if value[key] %}
-                {% for val in value[key]%}
+                {% for val in (value.getlist(key) if is_form_value else value[key])%}
                 <option selected="selected">{{val}}</option>
                 {%endfor%}
                 {%endif%}
@@ -269,7 +269,7 @@
           {% if not item.many and  value[key]%}
           data: {{foreign_model._select2_initial_data(request,value[key] if is_form_value else value[key][fpk]) | tojson | safe}},
           {% elif item.many and value[key]%}
-          data: {{foreign_model._select2_initial_data(request,value[key] if is_form_value else (value[key]|map(attribute=fpk))|list) | tojson | safe}},
+          data: {{foreign_model._select2_initial_data(request,value.getlist(key) if is_form_value else (value[key]|map(attribute=fpk))|list) | tojson | safe}},
           {% endif %}
           ajax: {
             url: "{{ds(foreign_model)}}",

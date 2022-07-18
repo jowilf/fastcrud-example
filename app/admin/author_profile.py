@@ -8,8 +8,7 @@ from starlette.datastructures import FormData
 from starlette.requests import Request
 
 from app.internal.base_models import BaseAdminModel
-from app.models.author_profile import (AuthorProfile, AuthorProfileIn,
-                                       AuthorProfilePatchBody)
+from app.models.author_profile import AuthorProfile, AuthorProfileIn
 from app.utils import pydantic_error_to_form_validation_error
 
 if TYPE_CHECKING:
@@ -62,7 +61,7 @@ class AuthorProfileAdmin(BaseAdminModel):
             if _data["_keep_old_file"]:
                 _data.pop("file", None)
             author_profile = rm.author_profile.find_by_id(id)
-            author_profile_in = AuthorProfilePatchBody(**_data)
+            author_profile_in = AuthorProfileIn(**_data)
             author_profile.update(author_profile_in.dict())
             if _data["author"] is not None:
                 author = rm.author.find_by_id(_data["author"])

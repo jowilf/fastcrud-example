@@ -7,7 +7,7 @@ from starlette.datastructures import FormData
 from starlette.requests import Request
 
 from app.internal.base_models import BaseAdminModel
-from app.models.category import Category, CategoryIn, CategoryPatchBody
+from app.models.category import Category, CategoryIn
 from app.utils import pydantic_error_to_form_validation_error
 
 if TYPE_CHECKING:
@@ -65,7 +65,7 @@ class CategoryAdmin(BaseAdminModel):
             if _data["_keep_old_image"]:
                 _data.pop("image", None)
             category = rm.category.find_by_id(id)
-            category_in = CategoryPatchBody(**_data)
+            category_in = CategoryIn(**_data)
             category.update(category_in.dict())
             if _data["parent"] is not None:
                 category.parent_id = rm.category.find_by_id(_data["parent"]).id

@@ -185,7 +185,7 @@ class Admin:
                         "model": model,
                         "errors": errors,
                         "value": form,
-                        "is_form_value": True
+                        "is_form_value": True,
                     },
                 )
             return RedirectResponse(self.admin_url_for(request, model, "list"))

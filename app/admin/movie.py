@@ -7,7 +7,7 @@ from starlette.datastructures import FormData
 from starlette.requests import Request
 
 from app.internal.base_models import BaseAdminModel
-from app.models.movie import Movie, MovieIn, MoviePatchBody
+from app.models.movie import Movie, MovieIn
 from app.utils import pydantic_error_to_form_validation_error
 
 if TYPE_CHECKING:
@@ -68,7 +68,7 @@ class MovieAdmin(BaseAdminModel):
         try:
             _data = self._extract_fields(form_data, True)
             movie = rm.movie.find_by_id(id)
-            movie_in = MoviePatchBody(**_data)
+            movie_in = MovieIn(**_data)
             movie.update(movie_in.dict())
             if _data["preview"] is not None:
                 preview = rm.movie_preview.find_by_id(_data["preview"])

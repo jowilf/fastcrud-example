@@ -106,7 +106,6 @@ class AdminModel:
                     EnumField,
                     DateField,
                     TimeField,
-                    JSONField,
                     NumberField,
                 ]
                 and not field.is_array

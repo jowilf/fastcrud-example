@@ -11,7 +11,7 @@ from starlette.status import HTTP_409_CONFLICT
 
 from app.filters.user import UserFilter
 from app.internal.base_models import BaseAdminModel
-from app.models.user import User, UserPatchBody, UserRegister
+from app.models.user import User, UserIn, UserRegister
 from app.services.password import hash_password
 from app.utils import pydantic_error_to_form_validation_error
 
@@ -75,7 +75,7 @@ class UserAdmin(BaseAdminModel):
         try:
             _data = self._extract_fields(form_data, True)
             user = rm.user.find_by_id(id)
-            user_in = UserPatchBody(**_data)
+            user_in = UserIn(**_data)
             if (
                 user.username != user_in.username
                 and rm.user.find_one(UserFilter(username=user_in.username)) is not None
