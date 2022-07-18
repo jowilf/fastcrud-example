@@ -48,7 +48,7 @@ class MovieAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 movie_in = MovieIn(**_data)
-                movie = Movie(**movie_in.dict())
+                movie = rm.movie.create(Movie(**movie_in.dict()))
                 if _data["preview"] is not None:
                     preview = rm.movie_preview.find_by_id(_data["preview"])
                     preview.movie_id = movie.id
@@ -56,7 +56,7 @@ class MovieAdmin(BaseAdminModel):
                     movie.category_id = rm.category.find_by_id(_data["category"]).id
                 if len(_data["authors"]) > 0:
                     movie.authors = rm.author.find_by_ids(_data["authors"])
-                rm.movie.save(movie)
+                return rm.movie.save(movie)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)
 
@@ -80,6 +80,6 @@ class MovieAdmin(BaseAdminModel):
                 else:
                     movie.category = None
                 movie.authors = rm.author.find_by_ids(_data["authors"])
-                rm.movie.save(movie)
+                return rm.movie.save(movie)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)

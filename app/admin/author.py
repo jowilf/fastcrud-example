@@ -52,7 +52,7 @@ class AuthorAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 author_in = AuthorIn(**_data)
-                author = Author(**author_in.dict())
+                author = rm.author.create(Author(**author_in.dict()))
                 if _data["profile"] is not None:
                     profile = rm.author_profile.find_by_id(_data["profile"])
                     if profile.author is not None:
@@ -67,7 +67,7 @@ class AuthorAdmin(BaseAdminModel):
                     author.friends = rm.author.find_by_ids(_data["friends"])
                 if len(_data["friends_of"]) > 0:
                     author.friends_of = rm.author.find_by_ids(_data["friends_of"])
-                rm.author.save(author)
+                return rm.author.save(author)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)
 
@@ -93,6 +93,6 @@ class AuthorAdmin(BaseAdminModel):
                 author.movies = rm.movie.find_by_ids(_data["movies"])
                 author.friends = rm.author.find_by_ids(_data["friends"])
                 author.friends_of = rm.author.find_by_ids(_data["friends_of"])
-                rm.author.save(author)
+                return rm.author.save(author)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)

@@ -136,7 +136,15 @@ class AdminModel:
                 not is_edit and not field.exclude_from_create
             ):
                 if (
-                    type(field) in [NumberField, EmailField, PhoneField]
+                    type(field)
+                    in [
+                        NumberField,
+                        EmailField,
+                        PhoneField,
+                        DateTimeField,
+                        DateField,
+                        TimeField,
+                    ]
                     and form_data.get(name) == ""
                 ):
                     data[name] = None
@@ -153,7 +161,7 @@ class AdminModel:
         logger.info(data)
         return data
 
-    def to_dict(self, value) -> Dict[str, str]:
+    def item_to_dict(self, value) -> Dict[str, str]:
         data = dict()
         for name in self.search_columns().values():
             data[name] = getattr(value, name)
@@ -163,6 +171,9 @@ class AdminModel:
     def _select2_initial_data(self, pks):
         if type(pks) is not list:
             pks = [pks]
-        logger.info(pks)
-        logger.info(self.find_by_pks(pks))
-        return [self.to_dict(item) for item in self.find_by_pks(pks)]
+        datas = []
+        for item in self.find_by_pks(pks):
+            data = self.item_to_dict(item)
+            data["selected"] = True
+            datas.append(data)
+        return datas

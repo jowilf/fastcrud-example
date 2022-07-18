@@ -44,14 +44,14 @@ class CategoryAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 category_in = CategoryIn(**_data)
-                category = Category(**category_in.dict())
+                category = rm.category.create(Category(**category_in.dict()))
                 if _data["parent"] is not None:
                     category.parent_id = rm.category.find_by_id(_data["parent"]).id
                 if len(_data["movies"]) > 0:
                     category.movies = rm.movie.find_by_ids(_data["movies"])
                 if len(_data["childs"]) > 0:
                     category.childs = rm.category.find_by_ids(_data["childs"])
-                rm.category.save(category)
+                return rm.category.save(category)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)
 
@@ -70,6 +70,6 @@ class CategoryAdmin(BaseAdminModel):
                     category.parent = None
                 category.movies = rm.movie.find_by_ids(_data["movies"])
                 category.childs = rm.category.find_by_ids(_data["childs"])
-                rm.category.save(category)
+                return rm.category.save(category)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)

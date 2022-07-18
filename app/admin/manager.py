@@ -40,10 +40,10 @@ class ManagerAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 manager_in = ManagerIn(**_data)
-                manager = Manager(**manager_in.dict())
+                manager = rm.manager.create(Manager(**manager_in.dict()))
                 if len(_data["authors"]) > 0:
                     manager.authors = rm.author.find_by_ids(_data["authors"])
-                rm.manager.save(manager)
+                return rm.manager.save(manager)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)
 
@@ -55,6 +55,6 @@ class ManagerAdmin(BaseAdminModel):
                 manager_in = ManagerPatchBody(**_data)
                 manager.update(manager_in.dict())
                 manager.authors = rm.author.find_by_ids(_data["authors"])
-                rm.manager.save(manager)
+                return rm.manager.save(manager)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)

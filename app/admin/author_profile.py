@@ -44,11 +44,13 @@ class AuthorProfileAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 author_profile_in = AuthorProfileIn(**_data)
-                author_profile = AuthorProfile(**author_profile_in.dict())
+                author_profile = rm.author_profile.create(
+                    AuthorProfile(**author_profile_in.dict())
+                )
                 if _data["author"] is not None:
                     author = rm.author.find_by_id(_data["author"])
                     author.profile_id = author_profile.id
-                rm.author_profile.save(author_profile)
+                return rm.author_profile.save(author_profile)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)
 
@@ -69,6 +71,6 @@ class AuthorProfileAdmin(BaseAdminModel):
                     author.profile_id = author_profile.id
                 else:
                     author_profile.author = None
-                rm.author_profile.save(author_profile)
+                return rm.author_profile.save(author_profile)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)

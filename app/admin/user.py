@@ -66,8 +66,8 @@ class UserAdmin(BaseAdminModel):
                         ],
                     )
                 user_in.password = hash_password(user_in.password)
-                user = User(**user_in.dict())
-                rm.user.save(user)
+                user = rm.user.create(User(**user_in.dict()))
+                return user
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)
 
@@ -89,6 +89,6 @@ class UserAdmin(BaseAdminModel):
                         ],
                     )
                 user.update(user_in.dict())
-                rm.user.save(user)
+                return rm.user.save(user)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)

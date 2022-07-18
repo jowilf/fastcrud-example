@@ -1,3 +1,4 @@
+import urllib.parse
 from typing import Dict, Optional
 
 from common.admin import Admin as BaseAdmin
@@ -97,7 +98,8 @@ class Admin(BaseAdmin):
     ):
         if await self.authentication_required(request, rm):
             return RedirectResponse(
-                request.url_for("admin_login") + f"?callback_url={request.url}"
+                request.url_for("admin_login")
+                + f"?callback_url={urllib.parse.quote(str(request.url).encode('utf8'))}"
             )
         if model is None:
             return RedirectResponse(

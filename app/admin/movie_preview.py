@@ -41,14 +41,16 @@ class MoviePreviewAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 movie_preview_in = MoviePreviewIn(**_data)
-                movie_preview = MoviePreview(**movie_preview_in.dict())
+                movie_preview = rm.movie_preview.create(
+                    MoviePreview(**movie_preview_in.dict())
+                )
                 if _data["movie"] is not None:
                     movie = rm.movie.find_by_id(_data["movie"])
                     if movie.preview is not None:
                         movie.preview = None
                         rm.save(movie)
                     movie_preview.movie_id = movie.id
-                rm.movie_preview.save(movie_preview)
+                return rm.movie_preview.save(movie_preview)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)
 
@@ -69,6 +71,6 @@ class MoviePreviewAdmin(BaseAdminModel):
                     movie_preview.movie_id = movie.id
                 else:
                     movie_preview.movie = None
-                rm.movie_preview.save(movie_preview)
+                return rm.movie_preview.save(movie_preview)
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)
