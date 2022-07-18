@@ -222,7 +222,8 @@ $(function(){
         $("#modal-delete").modal('hide');
         $("#modal-loading").modal('show');
         fetch(`{{ ds(model) | safe}}?where=${JSON.stringify({{'{'+pk}}: {{value[pk]}}})}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: {{ajax_headers() | safe}},
         }).then(async response=>{
             if(response.ok){
             await new Promise(r => setTimeout(r, 500));

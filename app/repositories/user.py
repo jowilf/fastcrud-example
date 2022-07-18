@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 from fastapi import HTTPException
 from jose import JWTError, jwt
-from pydantic import ValidationError
 from starlette.status import (HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND,
                               HTTP_409_CONFLICT)
 

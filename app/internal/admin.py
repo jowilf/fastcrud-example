@@ -5,6 +5,7 @@ from common.admin import Admin as BaseAdmin
 from fastapi import Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from jose import JWTError
+from pydantic import ValidationError
 
 from app.admin.author import AuthorAdmin
 from app.admin.author_profile import AuthorProfileAdmin
@@ -18,6 +19,7 @@ from app.dependencies import repository_manager
 from app.internal.base_models import BaseAdminModel
 from app.internal.repository_manager import RepositoryManager
 from app.models.auth import LoginBody
+from app.utils import pydantic_error_to_form_validation_error
 
 
 class Admin(BaseAdmin):
@@ -69,6 +71,11 @@ class Admin(BaseAdmin):
                 )
                 return response
 
+            except ValidationError as exc:
+                return await super().render_login(
+                    request,
+                    form_errors=pydantic_error_to_form_validation_error(exc),
+                )
             except HTTPException:
                 return await super().render_login(
                     request, error="Invalid username or password"
@@ -96,6 +103,7 @@ class Admin(BaseAdmin):
         id: Optional[str] = Query(None),
         rm: RepositoryManager = Depends(repository_manager),
     ):
+        request.state.rm = rm
         if await self.authentication_required(request, rm):
             return RedirectResponse(
                 request.url_for("admin_login")

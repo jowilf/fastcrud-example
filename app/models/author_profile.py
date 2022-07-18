@@ -58,7 +58,7 @@ class AuthorProfilePatchBody(
     pass
 
 
-class AuthorProfileRelationsOut(BaseSQLModel):
+class AuthorProfileRelationsOut(SQLModel):
     author: Optional["AuthorOutWithoutRelations"]
 
 

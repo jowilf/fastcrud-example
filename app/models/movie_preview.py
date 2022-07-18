@@ -60,7 +60,7 @@ class MoviePreviewPatchBody(
     pass
 
 
-class MoviePreviewRelationsOut(BaseSQLModel):
+class MoviePreviewRelationsOut(SQLModel):
     movie: Optional["MovieOutWithoutRelations"]
 
 

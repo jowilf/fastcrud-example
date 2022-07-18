@@ -35,7 +35,7 @@ class ManagerPatchBody(ManagerIn, metaclass=AllOptional):
     pass
 
 
-class ManagerRelationsOut(BaseSQLModel):
+class ManagerRelationsOut(SQLModel):
     authors: List["AuthorOutWithoutRelations"]
 
 

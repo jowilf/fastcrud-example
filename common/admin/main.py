@@ -119,14 +119,17 @@ class Admin:
         )
 
     async def _show(self, request: Request, model: AdminModel, pk) -> Response:
-        if pk is None or model.find_by_pk(pk) is None:
+        if pk is None:
+            return await self._404(request)
+        value = model.find_by_pk(request, pk)
+        if value is None:
             return await self._404(request)
         return self.template.TemplateResponse(
             "show.html",
             {
                 "request": request,
                 "model": model,
-                "value": model.find_by_pk(pk),
+                "value": value,
             },
         )
 
@@ -142,7 +145,7 @@ class Admin:
         elif request.method == "POST":
             try:
                 form = await request.form()
-                model.create(form)
+                model.create(request, form)
             except FormValidationError as errors:
                 return self.template.TemplateResponse(
                     "create.html",
@@ -156,7 +159,10 @@ class Admin:
             return RedirectResponse(self.admin_url_for(request, model, "list"))
 
     async def _edit(self, request: Request, model: AdminModel, pk) -> Response:
-        if pk is None or model.find_by_pk(pk) is None:
+        if pk is None:
+            return await self._404(request)
+        value = model.find_by_pk(request, pk)
+        if value is None:
             return await self._404(request)
         if request.method == "GET":
             return self.template.TemplateResponse(
@@ -164,20 +170,35 @@ class Admin:
                 {
                     "request": request,
                     "model": model,
-                    "value": model.find_by_pk(pk),
+                    "value": value,
                 },
             )
         elif request.method == "POST":
-            form = await request.form()
-            model.edit(form, pk)
-            return Response(status_code=HTTP_200_OK)
+            try:
+                form = await request.form()
+                model.edit(request, form, pk)
+            except FormValidationError as errors:
+                return self.template.TemplateResponse(
+                    "edit.html",
+                    {
+                        "request": request,
+                        "model": model,
+                        "errors": errors,
+                        "value": form,
+                        "is_form_value": True
+                    },
+                )
+            return RedirectResponse(self.admin_url_for(request, model, "list"))
 
     async def render_login(
-        self, request: Request, error: Optional[str] = None
+        self,
+        request: Request,
+        error: Optional[str] = None,
+        form_errors: FormValidationError = None,
     ) -> Response:
         return self.template.TemplateResponse(
             "login.html",
-            {"request": request, "error": error},
+            {"request": request, "error": error, "form_errors": form_errors},
         )
 
     async def render_dashboard(

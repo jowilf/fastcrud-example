@@ -82,7 +82,7 @@ class UserPatchBody(UserIn, metaclass=AllOptional):
     pass
 
 
-class UserRelationsOut(BaseSQLModel):
+class UserRelationsOut(SQLModel):
     pass
 
 

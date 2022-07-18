@@ -151,7 +151,7 @@
                   class="btn btn-primary btn-block ms-2"
                 >
                   <i class="fa-solid fa-plus me-2"></i>
-                  New {{ entity_name }}
+                  New {{ model.get_name() }}
                 </a>
               </div>
             </div>
@@ -224,10 +224,10 @@
     return "fa-file";
   }
   function null_column() {
-    return '<span class="text-center text-muted"> {{"<null>"}} </span>';
+    return '<span class="text-center text-muted"> {{"-null-"}} </span>';
   }
   function empty_column() {
-    return '<span class="text-center text-muted"> {{"<empty>"}} </span>';
+    return '<span class="text-center text-muted"> {{"-empty-"}} </span>';
   }
   function pretty_print_json(data) {
     var jsonLine = /^( *)("[\w]+": )?("[^"]*"|[\w.+-]*)?([,[{])?$/gm;
@@ -418,7 +418,7 @@
         [5, 10, 25, 50, 100, "All"],
       ],
       pagingType: "full_numbers",
-      pageLength: 10,
+      pageLength: 5,
       select: {
             style:    'multi',
             selector: 'td:first-child .form-check-input',

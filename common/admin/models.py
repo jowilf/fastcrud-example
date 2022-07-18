@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Tuple
 from fastapi import Request
 
 from loguru import logger
+from common.admin.exceptions import FormValidationError
 
 from common.admin.helpers import slugify_class_name
 from common.admin.fields import (
@@ -47,29 +48,32 @@ class AdminModel:
         pass
 
     @abstractmethod
-    def find_by_pk(self, id):
+    def find_by_pk(self, request: Request, id):
         pass
 
     @abstractmethod
-    def find_by_pks(self, ids):
+    def find_by_pks(self, request: Request, ids):
         pass
 
     @abstractmethod
-    def create(self, form_data: FormData):
+    def create(self, request: Request, form_data: FormData):
         pass
 
     @abstractmethod
-    def edit(self, form_data: FormData, id):
+    def edit(self, request: Request, form_data: FormData, id):
         pass
 
     def can_view(self, request: Request) -> bool:
-        pass
+        return True
 
     def can_edit(self, request: Request) -> bool:
-        pass
+        return True
 
     def can_create(self, request: Request) -> bool:
-        pass
+        return True
+
+    def can_delete(self, request: Request) -> bool:
+        return True
 
     def _export_columns(self) -> List[int]:
         return list(
@@ -151,7 +155,10 @@ class AdminModel:
                 elif type(field) == BooleanField and form_data.get(name) is None:
                     data[name] = False
                 elif type(field) == JSONField and form_data.get(name) is not None:
-                    data[name] = json.loads(form_data.get(name))
+                    try:
+                        data[name] = json.loads(form_data.get(name))
+                    except:
+                        raise FormValidationError({name: "Invalid JSON value"})
                 elif field.is_array:
                     data[name] = form_data.getlist(name)
                 else:
@@ -165,14 +172,16 @@ class AdminModel:
         data = dict()
         for name in self.search_columns().values():
             data[name] = getattr(value, name)
-        data["selected"] = True
         return data
 
-    def _select2_initial_data(self, pks):
-        if type(pks) is not list:
-            pks = [pks]
+    def _select2_initial_data(self, request: Request, pk):
+        items = []
+        if type(pk) is list:
+            items = self.find_by_pks(request, pk)
+        else:
+            items = [self.find_by_pk(request, pk)]
         datas = []
-        for item in self.find_by_pks(pks):
+        for item in items:
             data = self.item_to_dict(item)
             data["selected"] = True
             datas.append(data)

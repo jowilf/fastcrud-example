@@ -62,7 +62,7 @@ class MoviePatchBody(MovieIn, metaclass=AllOptional):
     pass
 
 
-class MovieRelationsOut(BaseSQLModel):
+class MovieRelationsOut(SQLModel):
     preview: Optional["MoviePreviewOutWithoutRelations"]
     category: Optional["CategoryOutWithoutRelations"]
     authors: List["AuthorOutWithoutRelations"]

@@ -1,7 +1,4 @@
 from typing import Any, Dict, Optional, Tuple, Type
-from black import err
-
-from loguru import logger
 
 from common.admin.exceptions import FormValidationError
 from pydantic import ValidationError
@@ -38,8 +35,6 @@ def pydantic_error_to_form_validation_error(
     exc: ValidationError,
 ) -> FormValidationError:
     errors = dict()
-    logger.info(exc.errors())
     for pydantic_error in exc.errors():
         errors[pydantic_error["loc"][-1]] = pydantic_error["msg"]
-    logger.info(errors)
     return FormValidationError(errors)

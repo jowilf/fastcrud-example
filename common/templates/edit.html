@@ -19,7 +19,7 @@
   <div class="row">
     <div class="col-12">
       <div class="card">
-        <form>
+        <form action="{{request.url | safe}}" method="POST" enctype="multipart/form-data">
           <div class="card-header">
             <div class="container-fluid">
               <div class="d-flex justify-content-between align-items-center">
@@ -37,7 +37,7 @@
               <textarea
                 id="{{key}}"
                 name="{{key}}"
-                class="form-control"
+                class="form-control  {%if errors and errors.has(key)%}is-invalid{%endif%}"
                 name="example-textarea-input"
                 rows="6"
                 placeholder="{{key | title}}..."
@@ -46,7 +46,7 @@
               <select
                 id="{{key}}"
                 name="{{key}}"
-                class="form-control form-select"
+                class="form-control form-select  {%if errors and errors.has(key)%}is-invalid{%endif%}"
                 data-tags="true"
                 multiple="multiple"
               > {% if value[key] %}
@@ -56,7 +56,7 @@
                 {%endif%}
               </select>
               {%elif item.type == "string" and item.enum%}
-              <select id="{{key}}" name="{{key}}"  class="form-control form-select">
+              <select id="{{key}}" name="{{key}}"  class="form-control form-select  {%if errors and errors.has(key)%}is-invalid{%endif%}">
                 {%for enum_item in item['values']%}
                 <option value="{{enum_item}}"{{'selected="selected"' if value[key]==enum_item else ''}}>{{enum_item}}</option>
                 {%endfor%}
@@ -66,7 +66,7 @@
                 id="{{key}}"
                 name="{{key}}"
                 type="tel"
-                class="form-control"
+                class="form-control  {%if errors and errors.has(key)%}is-invalid{%endif%}"
                 placeholder="{{key | title}}"
                 autocomplete="off"
                 value="{{value[key] if value[key] else '' }}"
@@ -77,7 +77,7 @@
               <input
                 id="{{key}}"
                 type="email"
-                class="form-control"
+                class="form-control  {%if errors and errors.has(key)%}is-invalid{%endif%}"
                 placeholder="{{key | title}}"
                 value="{{value[key] if value[key] else '' }}"
                 {%if
@@ -88,7 +88,7 @@
                 id="{{key}}"
                 name="{{key}}"
                 type="text"
-                class="form-control"
+                class="form-control  {%if errors and errors.has(key)%}is-invalid{%endif%}"
                 placeholder="{{key | title}}"
                 value="{{value[key] if value[key] else '' }}"
                 {%if
@@ -99,7 +99,7 @@
                 id="{{key}}"
                 name="{{key}}"
                 type="number"
-                class="form-control"
+                class="form-control  {%if errors and errors.has(key)%}is-invalid{%endif%}"
                 placeholder="{{key | title}}"
                 value="{{value[key] if value[key] else '' }}"
                 {%if
@@ -107,18 +107,18 @@
               />
               {%elif item.type == "bool"%}
               <label class="form-check form-switch">
-                <input id="{{key}}" name="{{key}}" class="form-check-input" type="checkbox" {{'checked' if value[key] else ''}} />
+                <input id="{{key}}" name="{{key}}" class="form-check-input  {%if errors and errors.has(key)%}is-invalid{%endif%}" type="checkbox" {{'checked' if value[key] else ''}} />
               </label>
               {%elif item.type == "json"%}
               <div
                 id="{{key}}"
-                name="{{key}}"
                 class="form-control"
                 style="height: 400px"
               ></div>
+              <input type="text" name="{{key}}" value='{{value[key] if value[key] else '{}' }}' hidden>
               {%elif item.type in ("image","file")%}
                <input type="file"
-              class="form-control" id="{{key}}" name="{{key}}"  {%if item.is_array%} multiple
+              class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}" id="{{key}}" name="{{key}}"  {%if item.is_array%} multiple
               {%endif%} {% if item.type=="image" %} accept="image/*" {%endif%}
               {%if item.required%}required{%endif%}>
               <label class="form-check mt-1">
@@ -127,7 +127,7 @@
               </label>
               {%elif item.type ==
               "password"%}
-              <div>
+              <div class="{%if errors and errors.has(key)%}is-invalid{%endif%}">
                 <input
                   id="{{key}}"
                   name="{{key}}"
@@ -145,12 +145,12 @@
               </div>
               {%elif item.type in ("datetime","date","time")%} <input
               type="{{"datetime-local" if item.type =="datetime" else
-              item.type}}" class="form-control" id="{{key}}" name="{{key}}"  value="{{value[key]}}" />
+              item.type}}" class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}" id="{{key}}" name="{{key}}"  value="{{value[key]}}" />
               {%elif item.type == "relation"%}
-              <select data-allow-clear="true" data-placeholder="Select a {{key}}" id="{{key}}" name="{{key}}"  class="form-control form-select" {{'multiple' if item.many else ''}}>
+              <select data-allow-clear="true" data-placeholder="Select a {{key}}" id="{{key}}" name="{{key}}"  class="form-control form-select {%if errors and errors.has(key)%}is-invalid{%endif%}" {{'multiple' if item.many else ''}}>
               </select>
               {%endif%}
-              <div class="invalid-feedback" id="{{key}}-error" style="display: none;"></div>
+              {%if errors and errors.has(key)%}<div class="invalid-feedback">{{errors.msg(key)}}</div>{%endif%}
             </div>
             {%endfor%}
           </div>
@@ -266,8 +266,12 @@
         {% set fields = foreign_model.search_columns().values() | list %}
         $("#{{key}}").select2({
           allowClear: true,
+          {% if not item.many and  value[key]%}
+          data: {{foreign_model._select2_initial_data(request,value[key] if is_form_value else value[key][fpk]) | tojson | safe}},
+          {% elif item.many and value[key]%}
+          data: {{foreign_model._select2_initial_data(request,value[key] if is_form_value else (value[key]|map(attribute=fpk))|list) | tojson | safe}},
+          {% endif %}
           ajax: {
-
             url: "{{ds(foreign_model)}}",
             dataType: 'json',
             //delay: 250,
@@ -316,40 +320,17 @@
             }
 
         });
-        {%if value[key]%}
-             {%if item.many%}
-             whereclause={{'{'+pk}}: { in: {{value[key] | map(attribute=fpk) | list | safe}} } }
-             {%else %}
-             whereclause={{'{'+pk}}: {{value[key][fpk] }} }
-             {%endif%}
-             $.ajax({
-                url: `{{ds(foreign_model)}}?where=${JSON.stringify(whereclause)}`,
-                dataType: 'json',
-              }).then(function (data) {
-                console.log("{{key}}", data.items);
-                for(item of data.items){
-                text = `{%for col in fields %} {{col}}: ${item['{{col}}']} {%endfor%}`;
-                var option = new Option(text, item.{{fpk}}, true, true);
-                $(option).data('raw', item);
-                $("#{{key}}").append(option).trigger('change');
-                $("#{{key}}").trigger({
-                    type: 'select2:select',
-                    params: {
-                        data: item
-                    }
-                });
-                }
-
-            });
-        {%endif%}
         {% elif item.type == 'string' and item.enum %}
         $("#{{key}}").select2();
         {% elif item.type == 'string' and item.is_array %}
         $("#{{key}}").select2();
         {% elif item.type == 'json' %}
           const jsonEditor{{ key| title}} = new JSONEditor(document.getElementById("{{key}}"), {
-          mode: 'form',
-          modes: ['code', 'form', 'tree'],
+              mode: 'tree',
+              modes: ['code', 'tree'],
+              onChangeText: function (json) {
+                $('input[name={{key}}]').val(json);
+              }
           });
           {% if value[key] %}
           jsonEditor{{ key| title}}.set({{value[key] | tojson | safe}})
@@ -366,6 +347,7 @@
          });
         {% endif %}
         {% endfor %}
+        return;
         allFiles = []
         $("form").submit(function (event) {
             event.preventDefault();

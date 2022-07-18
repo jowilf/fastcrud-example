@@ -69,7 +69,7 @@ class CategoryPatchBody(CategoryRelationFields, CategoryBase, metaclass=AllOptio
     pass
 
 
-class CategoryRelationsOut(BaseSQLModel):
+class CategoryRelationsOut(SQLModel):
     movies: List["MovieOutWithoutRelations"]
     parent: Optional["CategoryOutWithoutRelations"]
     childs: List["CategoryOutWithoutRelations"]

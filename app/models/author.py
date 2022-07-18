@@ -86,7 +86,7 @@ class AuthorPatchBody(AuthorIn, metaclass=AllOptional):
     pass
 
 
-class AuthorRelationsOut(BaseSQLModel):
+class AuthorRelationsOut(SQLModel):
     manager: Optional["ManagerOutWithoutRelations"]
     profile: Optional["AuthorProfileOutWithoutRelations"]
     movies: List["MovieOutWithoutRelations"]
