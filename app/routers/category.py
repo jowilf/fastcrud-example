@@ -18,8 +18,6 @@ from app.models.category import (Category, CategoryIn, CategoryInBase,
                                  CategoryOut, CategoryOutWithoutRelations,
                                  CategoryPatchBody, category_in_form)
 from app.models.movie import Movie, MovieInBase, MovieOutWithoutRelations
-from app.models.user import User
-from app.services.auth import authorize
 
 router = APIRouter(prefix="/api/categories", tags=["categories-controller"])
 
@@ -213,7 +211,6 @@ async def get_movies(
     order_by: MovieOrderBy = Depends(),
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
-    user: User = Depends(authorize(["movie:view"])),
 ):
     where = MovieFilter.from_query(request)
     if where is None:
@@ -237,7 +234,6 @@ async def add_movies(
     movie_in: MovieInBase,
     id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
-    user: User = Depends(authorize(["movie:create"])),
 ):
     category = repository.category.find_by_id(id)
     new_movie = Movie(**movie_in.dict())

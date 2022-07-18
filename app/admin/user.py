@@ -11,7 +11,6 @@ from app.dependencies import repository_manager_ctx
 from app.filters.user import UserFilter
 from app.internal.base_models import BaseAdminModel
 from app.models.user import User, UserPatchBody, UserRegister
-from app.services.password import hash_password
 from app.utils import pydantic_error_to_form_validation_error
 
 
@@ -58,15 +57,7 @@ class UserAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 user_in = UserRegister(**_data)
-                if rm.user.find_one(UserFilter(username=user_in.username)) is not None:
-                    raise HTTPException(
-                        HTTP_409_CONFLICT,
-                        detail=[
-                            {"loc": ["username"], "msg": f"username already exist."}
-                        ],
-                    )
-                user_in.password = hash_password(user_in.password)
-                user = rm.user.create(User(**user_in.dict()))
+                user = rm.user.create(user_in)
                 return user
             except ValidationError as exc:
                 raise pydantic_error_to_form_validation_error(exc)

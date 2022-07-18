@@ -40,7 +40,7 @@ class ManagerAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 manager_in = ManagerIn(**_data)
-                manager = rm.manager.create(Manager(**manager_in.dict()))
+                manager = rm.manager.create(manager_in)
                 if len(_data["authors"]) > 0:
                     manager.authors = rm.author.find_by_ids(_data["authors"])
                 return rm.manager.save(manager)

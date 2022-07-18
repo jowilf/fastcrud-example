@@ -35,7 +35,6 @@ async def list_all(
     order_by: MovieOrderBy = Depends(),
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
-    user: User = Depends(authorize(["movie:view"])),
 ):
     total = repository.movie.find_all(
         pagination, MovieFilter.from_query(request), order_by, True
@@ -53,7 +52,6 @@ async def get_by_id(
     id: int = Path(...),
     exclude: Set[str] = Query({}),
     repository: RepositoryManager = Depends(repository_manager),
-    user: User = Depends(authorize(["movie:view"])),
 ):
     return repository.movie.find_by_id(id)
 
@@ -68,7 +66,6 @@ async def get_by_id(
 async def create_new(
     movie_in: MovieIn,
     repository: RepositoryManager = Depends(repository_manager),
-    user: User = Depends(authorize(["movie:create"])),
 ):
     return repository.movie.create(movie_in)
 
@@ -125,7 +122,6 @@ async def delete_movie(
 async def get_preview(
     id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
-    user: User = Depends(authorize(["movie_preview:view"])),
 ):
     movie = repository.movie.find_by_id(id)
     if movie.preview is None:

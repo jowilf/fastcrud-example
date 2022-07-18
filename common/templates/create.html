@@ -123,7 +123,7 @@
               {%endif%} {% if item.type=="image" %} accept="image/*" {%endif%}
               {%if item.required%}required{%endif%}> {%elif item.type ==
               "password"%}
-              <div>
+              <div class="{%if errors and errors.has(key)%}is-invalid{%endif%}">
                 <input
                   id="{{key}}"
                   name="{{key}}"

@@ -44,9 +44,7 @@ class AuthorProfileAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 author_profile_in = AuthorProfileIn(**_data)
-                author_profile = rm.author_profile.create(
-                    AuthorProfile(**author_profile_in.dict())
-                )
+                author_profile = rm.author_profile.create(author_profile_in)
                 if _data["author"] is not None:
                     author = rm.author.find_by_id(_data["author"])
                     author.profile_id = author_profile.id

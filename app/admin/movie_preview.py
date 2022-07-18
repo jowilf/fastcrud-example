@@ -41,9 +41,7 @@ class MoviePreviewAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 movie_preview_in = MoviePreviewIn(**_data)
-                movie_preview = rm.movie_preview.create(
-                    MoviePreview(**movie_preview_in.dict())
-                )
+                movie_preview = rm.movie_preview.create(movie_preview_in)
                 if _data["movie"] is not None:
                     movie = rm.movie.find_by_id(_data["movie"])
                     if movie.preview is not None:

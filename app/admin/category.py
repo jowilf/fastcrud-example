@@ -44,7 +44,7 @@ class CategoryAdmin(BaseAdminModel):
             try:
                 _data = self._extract_fields(form_data)
                 category_in = CategoryIn(**_data)
-                category = rm.category.create(Category(**category_in.dict()))
+                category = rm.category.create(category_in)
                 if _data["parent"] is not None:
                     category.parent_id = rm.category.find_by_id(_data["parent"]).id
                 if len(_data["movies"]) > 0:
