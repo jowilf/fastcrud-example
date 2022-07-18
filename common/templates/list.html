@@ -189,6 +189,7 @@
 ></script>
 {% endblock %} {% block script_end %}
 <script>
+  var selectedRows = [];
   function get_file_icon(mimeType) {
     mapping = {
       image: "fa-file-image",
@@ -254,7 +255,8 @@
       data: null,
       orderable: false,
       render: function (data, type, full, meta) {
-        return `<input data-id="${full.DT_RowId}" class="form-check-input" type="checkbox">`;
+        var is_check = selectedRows.indexOf(full.DT_RowId+'')>-1;
+        return `<input data-id="${full.DT_RowId}" class="form-check-input" type="checkbox" ${is_check ? "checked": ""}>`;
       }
     })
     columns.push({
@@ -422,7 +424,7 @@
       select: {
             style:    'multi',
             selector: 'td:first-child .form-check-input',
-            className: ''
+            className: 'row-selected'
         },
       buttons: [
         {%if export_config.csv %}
@@ -590,10 +592,12 @@
 
     $('[data-toggle="tooltip"]').tooltip()
 
+
     table
         .on( 'select', function ( e, dt, type, indexes ) {
             var rowData = table.rows( indexes ).data().toArray();
-            console.log('select',table.rows( { selected: true } ).ids().toArray());
+            selectedRows = table.rows( { selected: true } ).ids().toArray();
+            console.log('select',selectedRows);
             if(table.rows( { selected: true } ).count() == 0)
             $('#multi-delete-btn').hide()
             else
@@ -602,7 +606,8 @@
         } )
         .on( 'deselect', function ( e, dt, type, indexes ) {
             var rowData = table.rows( indexes ).data().toArray();
-            console.log('deselect '+table.rows( { selected: true } ).ids().toArray());
+            selectedRows = table.rows( { selected: true } ).ids().toArray();
+            console.log('deselect ',selectedRows);
             if(table.rows( { selected: true } ).count() == 0)
             $('#multi-delete-btn').hide()
             else
