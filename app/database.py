@@ -29,3 +29,6 @@ class Database:
     def reset_database(self):
         command.downgrade(self.config, "base")
         command.upgrade(self.config, "head")
+
+
+db = Database()

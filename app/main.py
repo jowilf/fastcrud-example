@@ -10,7 +10,6 @@ from starlette.status import HTTP_404_NOT_FOUND
 from starlette.templating import Jinja2Templates
 
 from app.config import config
-from app.database import Database
 from app.dependencies import get_templates
 from app.graphql.router import GraphQLRouter
 from app.internal.admin import admin
@@ -20,7 +19,6 @@ from app.storage import configure_storage
 
 
 def create_app() -> FastAPI:
-    db = Database()
     # db.migrate_schema()
 
     app = FastAPI(

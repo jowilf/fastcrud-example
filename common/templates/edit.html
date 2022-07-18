@@ -125,6 +125,24 @@
                 <input id="_keep_old_{{key}}" class="form-check-input" type="checkbox" checked>
                 <span class="form-check-label">Keep old {{key}}</span>
               </label>
+              {%elif item.type ==
+              "password"%}
+              <div>
+                <input
+                  id="{{key}}"
+                  name="{{key}}"
+                  type="password"
+                  class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}"
+                  placeholder="{{key | title}}"
+                  value="{{value[key] if value[key] else '' }}"
+                  required
+                />
+                <small class="form-hint">
+                  Your {{key}} must be {{item.min_length}}-{{item.max_length}} characters long{%if item.has_uppercase%}, contain at least one uppercase letter {%endif%}
+                  {%if item.has_lowercase%}, contain at least one lowercase letter {%endif%}{%if item.min_digits and item.min_digits>0%}, contain at least {{item.min_digits}} digits {%endif%}
+                  {%if item.special_chars and item.special_chars!=""%}, contain at least one special characteres ({{item.special_chars}}){%endif%}
+                </small>
+              </div>
               {%elif item.type in ("datetime","date","time")%} <input
               type="{{"datetime-local" if item.type =="datetime" else
               item.type}}" class="form-control" id="{{key}}" name="{{key}}"  value="{{value[key]}}" />
@@ -244,6 +262,7 @@
         {% set item = columns[key] %}
         {% if item.type == 'relation' %}
         {% set foreign_model = (columns[key].identity | to_model) %}
+        {% set fpk = foreign_model.pk() %}
         {% set fields = foreign_model.search_columns().values() | list %}
         $("#{{key}}").select2({
           allowClear: true,
@@ -273,7 +292,7 @@
             processResults: function (data, params) {
               return {
                 results: $.map(data.items, function(obj){
-                  obj.id = obj.id || obj.{{pk}};
+                  obj.id = obj.id || obj.{{fpk}};
                   return obj;
                 }),
                 pagination: {
@@ -287,11 +306,11 @@
           //allowClear: true,
           minimumInputLength: 0,
           templateResult: function (item){
-            if(!item.{{pk}}) return 'Search for a {{key}}'
+            if(!item.{{fpk}}) return 'Search for a {{key}}'
             return $(`{%for col in fields %}<strong>{{col}}: </strong>${item['{{col}}']} {%endfor%}</span>`);
           },
           templateSelection: function (item) {
-            if(!item.{{pk}}) return 'Search for a {{key}}'
+            if(!item.{{fpk}}) return 'Search for a {{key}}'
             if(item.text) return item.text;
               return $(`{%for col in fields %}<strong>{{col}}: </strong>${item['{{col}}']} {%endfor%}</span>`);
             }
@@ -299,9 +318,9 @@
         });
         {%if value[key]%}
              {%if item.many%}
-             whereclause={{'{'+pk}}: { in: {{value[key] | map(attribute=foreign_model.pk()) | list | safe}} } }
+             whereclause={{'{'+pk}}: { in: {{value[key] | map(attribute=fpk) | list | safe}} } }
              {%else %}
-             whereclause={{'{'+pk}}: {{value[key][foreign_model.pk()] }} }
+             whereclause={{'{'+pk}}: {{value[key][fpk] }} }
              {%endif%}
              $.ajax({
                 url: `{{ds(foreign_model)}}?where=${JSON.stringify(whereclause)}`,
@@ -310,7 +329,7 @@
                 console.log("{{key}}", data.items);
                 for(item of data.items){
                 text = `{%for col in fields %} {{col}}: ${item['{{col}}']} {%endfor%}`;
-                var option = new Option(text, item.{{foreign_model.pk()}}, true, true);
+                var option = new Option(text, item.{{fpk}}, true, true);
                 $(option).data('raw', item);
                 $("#{{key}}").append(option).trigger('change');
                 $("#{{key}}").trigger({

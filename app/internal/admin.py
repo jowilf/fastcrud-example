@@ -105,10 +105,8 @@ class Admin(BaseAdmin):
             )
         if action is None:
             return RedirectResponse(request.url.include_query_params(action="list"))
-        model = self._find_model_from_identity(model)
-        model.rm = rm
         return await super().render_dashboard(
-            request=request, model=model, action=action, pk=id
+            request=request, model_identity=model, action=action, pk=id
         )
 
 

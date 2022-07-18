@@ -1,5 +1,7 @@
 from typing import Any, Dict, Optional, Tuple, Type
 
+from common.admin.exceptions import FormValidationError
+from pydantic import ValidationError
 from sqlmodel import SQLModel
 from sqlmodel.main import SQLModelMetaclass
 
@@ -27,3 +29,12 @@ class _AllOptionalMeta(SQLModelMetaclass):
         class_dict["__annotations__"] = annotations
 
         return super().__new__(self, name, bases, class_dict, **kwargs)
+
+
+def pydantic_error_to_form_validation_error(
+    exc: ValidationError,
+) -> FormValidationError:
+    errors = dict()
+    for pydantic_error in exc.errors():
+        errors[pydantic_error["loc"][-1]] = pydantic_error["msg"]
+    return FormValidationError(errors)

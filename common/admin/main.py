@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import json
 import re
 from typing import Any, Dict, List, Optional, Type
 from starlette.requests import Request
@@ -7,6 +8,7 @@ from jinja2 import pass_context
 from loguru import logger
 from pydantic import BaseModel, ValidationError
 from sqlmodel import Session
+from common.admin.exceptions import FormValidationError
 
 from common.admin.models import AdminModel
 from starlette.templating import Jinja2Templates
@@ -57,6 +59,7 @@ class Admin:
         template.env.globals["admin_title"] = title
         template.env.globals["export_config"] = self.export_config
         template.env.globals["all_models"] = self.models
+        template.env.filters["tojson"] = lambda data: json.dumps(data, default=str)
         template.env.filters["file_icon"] = get_file_icon
         template.env.filters[
             "to_model"
@@ -137,9 +140,20 @@ class Admin:
                 },
             )
         elif request.method == "POST":
-            form = await request.form()
-            model.create(form)
-            return Response(status_code=HTTP_200_OK)
+            try:
+                form = await request.form()
+                model.create(form)
+            except FormValidationError as errors:
+                return self.template.TemplateResponse(
+                    "create.html",
+                    {
+                        "request": request,
+                        "model": model,
+                        "errors": errors,
+                        "value": form,
+                    },
+                )
+            return RedirectResponse(self.admin_url_for(request, model, "list"))
 
     async def _edit(self, request: Request, model: AdminModel, pk) -> Response:
         if pk is None or model.find_by_pk(pk) is None:
@@ -167,16 +181,10 @@ class Admin:
         )
 
     async def render_dashboard(
-        self,
-        request: Request,
-        model: AdminModel,
-        action: Optional[str],
-        pk: Any,
-        login_required: bool = False,
+        self, request: Request, model_identity: str, action: Optional[str], pk: Any
     ) -> Response:
         try:
-            if login_required and not self.is_authenticated(request):
-                return await self._login(request)
+            model = self._find_model_from_identity(model_identity)
             if model is not None:
                 if action == "list":
                     return await self._list(request, model)
@@ -195,3 +203,6 @@ class Admin:
         # except Exception as e:
         #     logger.exception(e)
         #     return await self._render_error(request, "500")
+
+
+# b64encode(b"username:password").decode("ascii")

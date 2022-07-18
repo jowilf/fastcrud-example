@@ -51,6 +51,10 @@ class AdminModel:
         pass
 
     @abstractmethod
+    def find_by_pks(self, ids):
+        pass
+
+    @abstractmethod
     def create(self, form_data: FormData):
         pass
 
@@ -83,7 +87,7 @@ class AdminModel:
             )
         )
 
-    def search_columns(self) -> List[int]:
+    def search_columns(self) -> Dict[int, str]:
         columns, i = dict(), 0
         for name, field in self.all_fields():
             if (
@@ -136,15 +140,29 @@ class AdminModel:
                     and form_data.get(name) == ""
                 ):
                     data[name] = None
-                elif type(field) == JSONField:
+                elif type(field) == BooleanField and form_data.get(name) is None:
+                    data[name] = False
+                elif type(field) == JSONField and form_data.get(name) is not None:
                     data[name] = json.loads(form_data.get(name))
                 elif field.is_array:
                     data[name] = form_data.getlist(name)
                 else:
                     data[name] = form_data.get(name)
                 if type(field) in [FileField, ImageField]:
-                    data[f"_keep_old_{name}"] = form_data.get(
-                        f"_keep_old_{name}"
-                    )
+                    data[f"_keep_old_{name}"] = form_data.get(f"_keep_old_{name}")
         logger.info(data)
         return data
+
+    def to_dict(self, value) -> Dict[str, str]:
+        data = dict()
+        for name in self.search_columns().values():
+            data[name] = getattr(value, name)
+        data["selected"] = True
+        return data
+
+    def _select2_initial_data(self, pks):
+        if type(pks) is not list:
+            pks = [pks]
+        logger.info(pks)
+        logger.info(self.find_by_pks(pks))
+        return [self.to_dict(item) for item in self.find_by_pks(pks)]
