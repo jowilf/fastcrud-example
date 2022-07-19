@@ -1,14 +1,14 @@
 from typing import TYPE_CHECKING, Optional
 
-from common.admin import BooleanField
-from common.admin import FileField as AdminFileField
-from common.admin import HasOne, JSONField, NumberField
+from common.admin import (BooleanField, FileField, HasOne, JSONField,
+                          NumberField)
 from pydantic import ValidationError
 from starlette.datastructures import FormData
 from starlette.requests import Request
 
 from app.internal.base_models import BaseAdminModel
-from app.models.author_profile import AuthorProfile, AuthorProfileIn
+from app.models.author_profile import (AuthorProfile, AuthorProfileIn,
+                                       AuthorProfilePatchBody)
 from app.utils import pydantic_error_to_form_validation_error
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ class AuthorProfileAdmin(BaseAdminModel):
     id = NumberField(
         exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
     )
-    file = AdminFileField(required=True)
+    file = FileField(required=True)
     info = JSONField()
     protected = BooleanField(required=True)
     author = HasOne(identity="author")
@@ -58,10 +58,10 @@ class AuthorProfileAdmin(BaseAdminModel):
         rm: RepositoryManager = request.state.rm
         try:
             _data = self._extract_fields(form_data, True)
-            if _data["_keep_old_file"]:
-                _data.pop("file", None)
             author_profile = rm.author_profile.find_by_id(id)
-            author_profile_in = AuthorProfileIn(**_data)
+            author_profile_in = AuthorProfilePatchBody(**_data)
+            if not _data["_keep_old_file"]:
+                author_profile.file = _data["file"]
             author_profile.update(author_profile_in.dict())
             if _data["author"] is not None:
                 author = rm.author.find_by_id(_data["author"])

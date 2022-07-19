@@ -6,7 +6,7 @@ from starlette.datastructures import FormData
 from starlette.requests import Request
 
 from app.internal.base_models import BaseAdminModel
-from app.models.manager import Manager, ManagerIn
+from app.models.manager import Manager, ManagerIn, ManagerPatchBody
 from app.utils import pydantic_error_to_form_validation_error
 
 if TYPE_CHECKING:
@@ -55,7 +55,7 @@ class ManagerAdmin(BaseAdminModel):
         try:
             _data = self._extract_fields(form_data, True)
             manager = rm.manager.find_by_id(id)
-            manager_in = ManagerIn(**_data)
+            manager_in = ManagerPatchBody(**_data)
             manager.update(manager_in.dict())
             manager.authors = rm.author.find_by_ids(_data["authors"])
             return rm.manager.save(manager)

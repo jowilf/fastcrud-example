@@ -1,0 +1,7 @@
+{% include "forms/_label.html" %}
+<select id="{{name}}" name="{{name}}" data-allow-clear="true" data-placeholder="Select a {{label}}"
+    class="form-control form-select {%if error%}is-invalid{%endif%}">
+    {%for enum_item in params['values']%}
+    <option value="{{enum_item}}" {{'selected="selected"' if value[key]==enum_item else ''}}>{{enum_item}}</option>
+    {%endfor%}
+</select>

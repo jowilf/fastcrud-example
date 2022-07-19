@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
-from common.admin import (DateTimeField, EmailField, NumberField,
-                          PasswordField, PhoneField, StringField)
+from common.admin import (BooleanField, DateTimeField, EmailField, NumberField,
+                          PasswordField, PhoneField, TagsField, TextField)
 from common.admin.exceptions import FormValidationError
 from fastapi import HTTPException
 from pydantic import ValidationError
@@ -11,7 +11,7 @@ from starlette.status import HTTP_409_CONFLICT
 
 from app.filters.user import UserFilter
 from app.internal.base_models import BaseAdminModel
-from app.models.user import User, UserIn, UserRegister
+from app.models.user import User, UserPatchBody, UserRegister
 from app.services.password import hash_password
 from app.utils import pydantic_error_to_form_validation_error
 
@@ -23,7 +23,7 @@ class UserAdmin(BaseAdminModel):
     id = NumberField(
         exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
     )
-    username = StringField(required=True)
+    username = TextField(required=True)
     phonenumber = PhoneField()
     email = EmailField()
     password = PasswordField(
@@ -37,8 +37,8 @@ class UserAdmin(BaseAdminModel):
         required=True,
     )
     date_joined = DateTimeField(exclude_from_create=True, exclude_from_edit=True)
-    roles = StringField(is_array=True)
-    is_superuser = StringField(exclude_from_create=True, exclude_from_edit=True)
+    roles = TagsField()
+    is_superuser = BooleanField(exclude_from_create=True, exclude_from_edit=True)
 
     def get_name(self) -> str:
         return "User"
@@ -75,7 +75,7 @@ class UserAdmin(BaseAdminModel):
         try:
             _data = self._extract_fields(form_data, True)
             user = rm.user.find_by_id(id)
-            user_in = UserIn(**_data)
+            user_in = UserPatchBody(**_data)
             if (
                 user.username != user_in.username
                 and rm.user.find_one(UserFilter(username=user_in.username)) is not None

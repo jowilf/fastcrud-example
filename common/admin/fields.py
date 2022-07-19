@@ -4,7 +4,8 @@ from pydantic import BaseModel
 
 
 class BaseField(BaseModel):
-    type: Optional[str] = "string"
+    type: Optional[str] = None
+    search_builder_type: Optional[str] = None
     format: Optional[str] = None
     required: Optional[bool] = False
     is_array: Optional[bool] = False
@@ -12,35 +13,53 @@ class BaseField(BaseModel):
     exclude_from_list: Optional[bool] = False
     exclude_from_create: Optional[bool] = False
     exclude_from_edit: Optional[bool] = False
-
-
-class NumberField(BaseField):
-    type: str = "num"
+    searchable: Optional[bool] = False
 
 
 class BooleanField(BaseField):
     type: str = "bool"
+    search_builder_type: Optional[str] = "string"
+    searchable: Optional[bool] = True
 
 
-class StringField(BaseField):
-    type: str = "string"
+class NumberField(BaseField):
+    type: str = "num"
+    search_builder_type: str = "num"
+    searchable: Optional[bool] = True
 
 
-class TextField(StringField):
+class TextField(BaseField):
+    type: Optional[str] = "text"
+    input_type = "text"
+    search_builder_type: Optional[str] = "string"
+    searchable: Optional[bool] = True
+
+
+class TextAreaField(TextField):
     multiline: bool = True
 
 
-class EmailField(StringField):
-    format: str = "email"
+class TagsField(TextField):
+    type: Optional[str] = "tags"
+    searchable: Optional[bool] = False
+    is_array: Optional[bool] = True
 
 
-class PhoneField(StringField):
-    format: str = "phone"
+class EmailField(TextField):
+    input_type = "email"
+    searchable: Optional[bool] = True
 
 
-class EnumField(StringField):
-    enum: bool = True
+class PhoneField(TextField):
+    input_type = "phone"
+    searchable: Optional[bool] = True
+
+
+class EnumField(BaseField):
+    type = "enum"
+    search_builder_type: Optional[str] = "string"
     values: List[Any] = []
+    searchable: Optional[bool] = True
 
     def __init__(self, type: Type[Enum], **data):
         values = list(map(lambda e: e.value, type))
@@ -52,6 +71,7 @@ class DateTimeField(BaseField):
     input_format: Optional[str] = None
     output_format: str = "MMMM Do, YYYY HH:mm:ss"
     api_format: Optional[str] = None
+    searchable: Optional[bool] = True
 
 
 class DateField(BaseField):
@@ -59,6 +79,7 @@ class DateField(BaseField):
     input_format: Optional[str] = "YYYY-MM-DD"
     output_format: str = "MMMM Do, YYYY"
     api_format: Optional[str] = "YYYY-MM-DD"
+    searchable: Optional[bool] = True
 
 
 class TimeField(BaseField):
@@ -66,6 +87,7 @@ class TimeField(BaseField):
     input_format: Optional[str] = "HH:mm:ss"
     output_format: str = "HH:mm:ss"
     api_format: Optional[str] = "HH:mm:ss"
+    searchable: Optional[bool] = True
 
 
 class JSONField(BaseField):
@@ -80,7 +102,7 @@ class ImageField(FileField):
     type: str = "image"
 
 
-class PasswordField(StringField):
+class PasswordField(TextField):
     type: str = "password"
     exclude_from_view: bool = True
     exclude_from_list: bool = True

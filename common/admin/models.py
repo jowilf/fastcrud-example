@@ -16,8 +16,8 @@ from common.admin.fields import (
     ImageField,
     PhoneField,
     RelationField,
-    StringField,
     BooleanField,
+    TagsField,
     TextField,
     EmailField,
     EnumField,
@@ -94,22 +94,7 @@ class AdminModel:
     def search_columns(self) -> Dict[int, str]:
         columns, i = dict(), 0
         for name, field in self.all_fields():
-            if (
-                type(field)
-                in [
-                    DateTimeField,
-                    PhoneField,
-                    StringField,
-                    BooleanField,
-                    TextField,
-                    EmailField,
-                    EnumField,
-                    DateField,
-                    TimeField,
-                    NumberField,
-                ]
-                and not field.is_array
-            ):
+            if (not field.is_array) and field.searchable:
                 columns[i + 2] = name
             if not field.exclude_from_list:
                 i += 1
@@ -133,6 +118,7 @@ class AdminModel:
     def _extract_fields(
         self, form_data: FormData, is_edit: bool = False
     ) -> Dict[str, Any]:
+        logger.info(form_data)
         data = dict()
         for name, field in self.all_fields():
             if (is_edit and not field.exclude_from_edit) or (
@@ -170,7 +156,7 @@ class AdminModel:
     def item_to_dict(self, value) -> Dict[str, str]:
         data = dict()
         for name in self.search_columns().values():
-            data[name] = getattr(value, name)
+            data[name] = str(getattr(value, name))
         return data
 
     def _select2_initial_data(self, request: Request, pk):
@@ -185,3 +171,20 @@ class AdminModel:
             data["selected"] = True
             datas.append(data)
         return datas
+
+    def need_select2(self) -> bool:
+        for name, field in self.all_fields():
+            if (
+                field.is_array
+                or isinstance(field, EnumField)
+                or isinstance(field, RelationField)
+                or isinstance(field, TagsField)
+            ):
+                return True
+        return False
+
+    def need_jsoneditor(self) -> bool:
+        for name, field in self.all_fields():
+            if isinstance(field, JSONField):
+                return True
+        return False

@@ -3,8 +3,10 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ admin_title }}</title>
-
-    {% block link %}{% endblock %}
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <link
       rel="stylesheet"
       href="https://unpkg.com/@tabler/core@1.0.0-beta10/dist/css/tabler.min.css"
@@ -16,10 +18,8 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
+
+    {% block link %}{% endblock %}
     <style>
       body {
         --tblr-body-font-family: "Inter", -apple-system, BlinkMacSystemFont,
@@ -40,6 +40,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3/moment.min.js"></script>
 
-    {% block script %}{% endblock %} {% block script_end %}{% endblock %}
+    {% block script %}{% endblock %}
   </body>
 </html>

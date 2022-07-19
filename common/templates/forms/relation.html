@@ -1,0 +1,4 @@
+{% include "forms/_label.html" %}
+<select data-allow-clear="true" data-placeholder="Select a {{name}}" id="{{name}}" name="{{name}}"
+    class="form-control form-select {%if error%}is-invalid{%endif%}" {{'multiple' if params.many else ''}}>
+</select>

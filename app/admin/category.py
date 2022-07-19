@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING, Optional
 
 from common.admin import (HasMany, HasOne, ImageField, NumberField,
-                          StringField, TextField)
+                          TextAreaField, TextField)
 from pydantic import ValidationError
 from starlette.datastructures import FormData
 from starlette.requests import Request
 
 from app.internal.base_models import BaseAdminModel
-from app.models.category import Category, CategoryIn
+from app.models.category import Category, CategoryIn, CategoryPatchBody
 from app.utils import pydantic_error_to_form_validation_error
 
 if TYPE_CHECKING:
@@ -18,8 +18,8 @@ class CategoryAdmin(BaseAdminModel):
     id = NumberField(
         exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
     )
-    name = StringField(required=True)
-    description = TextField()
+    name = TextField(required=True)
+    description = TextAreaField()
     image = ImageField()
     parent = HasOne(identity="category")
     movies = HasMany(identity="movie")
@@ -62,10 +62,10 @@ class CategoryAdmin(BaseAdminModel):
         rm: RepositoryManager = request.state.rm
         try:
             _data = self._extract_fields(form_data, True)
-            if _data["_keep_old_image"]:
-                _data.pop("image", None)
             category = rm.category.find_by_id(id)
-            category_in = CategoryIn(**_data)
+            category_in = CategoryPatchBody(**_data)
+            if not _data["_keep_old_image"]:
+                category.image = _data["image"]
             category.update(category_in.dict())
             if _data["parent"] is not None:
                 category.parent_id = rm.category.find_by_id(_data["parent"]).id

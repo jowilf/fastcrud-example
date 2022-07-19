@@ -1,14 +1,18 @@
 from typing import List
 
-from sqlmodel import TEXT, Column, Field, Relationship, SQLModel
+from sqlmodel import VARCHAR, Column, Field, Relationship, SQLModel
 
 from app.internal.base_models import BaseSQLModel
 from app.utils import _AllOptionalMeta as AllOptional
 
 
 class ManagerBase(SQLModel):
-    lastname: str = Field(..., sa_column=Column(TEXT, nullable=False))
-    firstname: str = Field(..., sa_column=Column(TEXT, nullable=False))
+    lastname: str = Field(
+        ..., sa_column=Column(VARCHAR(255), nullable=False, index=True)
+    )
+    firstname: str = Field(
+        ..., sa_column=Column(VARCHAR(255), nullable=False, index=True)
+    )
 
 
 class ManagerRelationFields(SQLModel):

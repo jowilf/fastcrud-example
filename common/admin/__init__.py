@@ -13,6 +13,7 @@ from .fields import JSONField as JSONField
 from .fields import NumberField as NumberField
 from .fields import PasswordField as PasswordField
 from .fields import PhoneField as PhoneField
-from .fields import StringField as StringField
+from .fields import TextAreaField as TextAreaField
+from .fields import TagsField as TagsField
 from .fields import TextField as TextField
 from .fields import TimeField as TimeField

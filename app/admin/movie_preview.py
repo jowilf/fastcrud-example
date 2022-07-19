@@ -1,12 +1,13 @@
 from typing import TYPE_CHECKING, Optional
 
-from common.admin import HasOne, ImageField, NumberField, StringField
+from common.admin import HasOne, ImageField, NumberField, TagsField
 from pydantic import ValidationError
 from starlette.datastructures import FormData
 from starlette.requests import Request
 
 from app.internal.base_models import BaseAdminModel
-from app.models.movie_preview import MoviePreview, MoviePreviewIn
+from app.models.movie_preview import (MoviePreview, MoviePreviewIn,
+                                      MoviePreviewPatchBody)
 from app.utils import pydantic_error_to_form_validation_error
 
 if TYPE_CHECKING:
@@ -18,7 +19,7 @@ class MoviePreviewAdmin(BaseAdminModel):
         exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
     )
     images = ImageField(is_array=True)
-    tags = StringField(is_array=True)
+    tags = TagsField()
     movie = HasOne(identity="movie")
 
     def get_name(self) -> str:
@@ -58,10 +59,10 @@ class MoviePreviewAdmin(BaseAdminModel):
         rm: RepositoryManager = request.state.rm
         try:
             _data = self._extract_fields(form_data, True)
-            if _data["_keep_old_images"]:
-                _data.pop("images", None)
             movie_preview = rm.movie_preview.find_by_id(id)
-            movie_preview_in = MoviePreviewIn(**_data)
+            movie_preview_in = MoviePreviewPatchBody(**_data)
+            if not _data["_keep_old_images"]:
+                movie_preview.images = _data["images"]
             movie_preview.update(movie_preview_in.dict())
             if _data["movie"] is not None:
                 movie = rm.movie.find_by_id(_data["movie"])

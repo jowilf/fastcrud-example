@@ -1,10 +1,5 @@
-{% extends "layout.html" %}
-{%set pk = model.pk()%}
-{%set columns= model.cols() %}
-{%if not value%}
-{%set value = {} %}
-{%endif%}
-{% block header %}
+{% extends "layout.html" %} {%set pk = model.pk()%} {%set columns= model.cols()
+%} {%if not value%} {%set value = {} %} {%endif%} {% block header %}
 <div class="d-flex justify-content-between align-items-center">
   <h1>{{ model.get_name() }}</h1>
   <ol class="breadcrumb">
@@ -22,7 +17,11 @@
   <div class="row">
     <div class="col-12">
       <div class="card">
-        <form action="{{request.url | safe}}" method="POST" enctype="multipart/form-data">
+        <form
+          action="{{request.url | safe}}"
+          method="POST"
+          enctype="multipart/form-data"
+        >
           <div class="card-header">
             <div class="container-fluid">
               <div class="d-flex justify-content-between align-items-center">
@@ -31,138 +30,23 @@
             </div>
           </div>
           <div class="card-body border-bottom py-3">
-
-
             {%for key in columns if not columns[key].exclude_from_create %}
-            {%set item = columns[key] %}
-
+            {%set params = columns[key] %}
             <div class="mb-3">
-              <label class="form-label" for="{{key}}">{{key|field_title}}</label>
-              {%if item.type == "string" and item.multiline%}
-              <textarea
-                id="{{key}}"
-                name="{{key}}"
-                class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}"
-                rows="6"
-                placeholder="{{key | title}}..."
-              >{%if value[key]%}{{value[key]}}{%endif%}</textarea>
-              {%elif item.type == "string" and item.is_array%}
-              <select
-                id="{{key}}"
-                name="{{key}}"
-                class="form-control form-select {%if errors and errors.has(key)%}is-invalid{%endif%}"
-                data-tags="true"
-                multiple="multiple"
-              >
-                {% if value[key] %}
-                {% for val in value.getlist(key)%}
-                <option selected="selected">{{val}}</option>
-                {%endfor%}
-                {%endif%}
-              </select>
-              {%elif item.type == "string" and item.enum%}
-              <select id="{{key}}" name="{{key}}" data-allow-clear="true" data-placeholder="Select a {{key}}" class="form-control form-select {%if errors and errors.has(key)%}is-invalid{%endif%}">
-                {%for enum_item in item['values']%}
-                <option value="{{enum_item}}"{{'selected="selected"' if value[key]==enum_item else ''}}>{{enum_item}}</option>
-                {%endfor%}
-              </select>
-              {%elif item.phone%}
-              <input
-                id="{{key}}"
-                name="{{key}}"
-                type="tel"
-                class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}"
-                placeholder="{{key | title}}"
-                autocomplete="off"
-                value="{{value[key] if value[key] else '' }}"
-                {%if item.required%}required{%endif%}
-              />
-              {%elif item.email%}
-              <input
-                id="{{key}}"
-                name="{{key}}"
-                type="email"
-                class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}"
-                placeholder="{{key | title}}"
-                value="{{value[key] if value[key] else '' }}"
-                {%if item.required%}required{%endif%}
-              />
-              {%elif item.type == "string"%}
-              <input
-                id="{{key}}"
-                name="{{key}}"
-                type="text"
-                class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}"
-                placeholder="{{key | title}}"
-                value="{{value[key] if value[key] else '' }}"
-                {%if item.required%}required{%endif%}
-              />
-              {%elif item.type == "num"%}
-              <input
-                id="{{key}}"
-                name="{{key}}"
-                type="number"
-                class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}"
-                placeholder="{{key | title}}"
-                value="{{value[key] if value[key] else '' }}"
-                {%if item.required%}required{%endif%}
-              />
-              {%elif item.type == "bool"%}
-              <label class="form-check form-switch">
-                <input id="{{key}}" name="{{key}}"class="form-check-input {%if errors and errors.has(key)%}is-invalid{%endif%}" type="checkbox" {{'checked' if value[key] else ''}}/>
-              </label>
-              {%elif item.type == "json"%}
-              <div
-                id="{{key}}"
-                class="form-control"
-                style="height: 400px"
-              ></div>
-              <input type="text" name="{{key}}" value='{{value[key] if value[key] else '{}' }}' hidden>
-              {%elif item.type in ("image","file")%} <input type="file"
-              class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}" id="{{key}}" name="{{key}}" {%if item.is_array%} multiple
-              {%endif%} {% if item.type=="image" %} accept="image/*" {%endif%}
-              {%if item.required%}required{%endif%}> {%elif item.type ==
-              "password"%}
-              <div class="{%if errors and errors.has(key)%}is-invalid{%endif%}">
-                <input
-                  id="{{key}}"
-                  name="{{key}}"
-                  type="password"
-                  class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}"
-                  placeholder="{{key | title}}"
-                  value="{{value[key] if value[key] else '' }}"
-                  required
-                />
-                <small class="form-hint">
-                  Your {{key}} must be {{item.min_length}}-{{item.max_length}} characters long{%if item.has_uppercase%}, contain at least one uppercase letter {%endif%}
-                  {%if item.has_lowercase%}, contain at least one lowercase letter {%endif%}{%if item.min_digits and item.min_digits>0%}, contain at least {{item.min_digits}} digits {%endif%}
-                  {%if item.special_chars and item.special_chars!=""%}, contain at least one special characteres ({{item.special_chars}}){%endif%}
-                </small>
-              </div>
-              {%elif item.type in ("datetime","date","time")%} <input
-              type="{{"datetime-local" if item.type =="datetime" else
-              item.type}}" class="form-control {%if errors and errors.has(key)%}is-invalid{%endif%}" id="{{key}}" name="{{key}}" {%if item.type == 'time'%}step="1"{%endif%} 
-              value="{{value[key]}}"/>
-
-              {%elif item.type == "relation"%}
-              {% set foreign_model = (item.identity | to_model) %}
-              {% set fpk = foreign_model.pk() %}
-              {% set fields = foreign_model.search_columns().values() | list %}
-              <select data-allow-clear="true" data-placeholder="Select a {{key}}" id="{{key}}" name="{{key}}" class="form-control form-select {%if errors and errors.has(key)%}is-invalid{%endif%}" {{'multiple' if item.many else ''}} value="{{value[key]}}">
-              
-              </select>
+              {%set data = value.getlist(key) if (is_form_value and
+              params.is_array) else value[key]%} {% with
+              action='create',name=key,data=data,
+              params=params,label=(key|field_title),error=(errors and
+              errors.has(key))%} {% include "forms/" ~ params.type ~ ".html" %}
+              {% endwith %} {%if errors and errors.has(key)%}
+              <div class="invalid-feedback">{{errors.msg(key)}}</div>
               {%endif%}
-              {%if errors and errors.has(key)%}<div class="invalid-feedback">{{errors.msg(key)}}</div>{%endif%}
-              
             </div>
-
             {%endfor%}
           </div>
           <div class="card-footer text-end">
             <div class="d-flex">
-              <a
-                href="{{ admin_url_for(model) }}"
-                class="btn btn-link"
+              <a href="{{ admin_url_for(model) }}" class="btn btn-link"
                 >Cancel</a
               >
               <button type="submit" class="btn btn-primary ms-auto">
@@ -197,150 +81,15 @@
   crossorigin="anonymous"
   referrerpolicy="no-referrer"
 ></script>
-{%endblock%} {%block modal%}
-<div
-  class="modal modal-blur fade"
-  id="modal-loading"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-body">
-        <div class="d-flex justify-content-center">
-          <div class="spinner-border text-primary" role="status"></div>
-          <span class="ms-2">Loading...</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<div
-  class="modal modal-blur fade"
-  id="modal-error"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"
-        aria-label="Close"
-      ></button>
-      <div class="modal-status bg-danger"></div>
-      <div class="modal-body text-center py-4">
-        <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon mb-2 text-danger icon-lg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M12 9v2m0 4v.01" />
-          <path
-            d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
-          />
-        </svg>
-        <h3>Something went wrong!</h3>
-        <div id="error-body" class="text-muted"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-{%endblock%} {%block script_end%}
 <script>
     $(function () {
-        {%for key in columns if not columns[key].exclude_from_create %}
-        {% set item = columns[key] %}
-        {% if item.type == 'relation' %}
-        {% set foreign_model = (columns[key].identity | to_model) %}
-        {% set fields = foreign_model.search_columns().values() | list %}
-        $("#{{key}}").select2({
-          allowClear: true,
-          {% if not item.many and value[key]%}
-          data: {{foreign_model._select2_initial_data(request,value[key]) | tojson | safe}},
-          {% elif item.many and value[key]%}
-          data: {{foreign_model._select2_initial_data(request, value.getlist(key)) | tojson | safe}},
-          {% endif %}
-          ajax: {
-            url: "{{ds(foreign_model)}}",
-            dataType: 'json',
-            //delay: 250,
-            data: function (params) {
-              where = {
-                  or: [
-                    {%for col in fields%}
-                    {
-                      {{col}}: {
-                        contains: params.term
-                      }
-                    },
-                    {%endfor%}
-                  ]
-              }
-              return {
-                skip: (params.page|| 0) * 20,
-                limit: 20,
-                where: JSON.stringify(where)
-              };
-            },
-            processResults: function (data, params) {
-              return {
-                results: $.map(data.items, function(obj){
-                  obj.id = obj.id || obj.{{pk}};
-                  return obj;
-                }),
-                pagination: {
-                  more: (params.page||0)*20 < data.total
-                }
-              };
-            },
-            cache: true
-          },
-          //placeholder: 'Search for a {{key}}',
-          //allowClear: true,
-          minimumInputLength: 0,
-          templateResult: function (item){
-            if(!item.{{pk}}) return 'Search for a {{key}}'
-            return $(`<span>{%for col in fields %}<strong>{{col}}: </strong>${item['{{col}}']} {%endfor%}</span>`);
-          },
-          templateSelection: function (item) {
-            if(!item.{{pk}}) return 'Search for a {{key}}'
-              return $(`<span>{%for col in fields %}<strong>{{col}}: </strong>${item['{{col}}']} {%endfor%}</span>`);
-            }
-
-        });
-        {% elif item.type == 'string' and item.enum %}
-        $("#{{key}}").select2();
-        {% elif item.type == 'string' and item.is_array %}
-        $("#{{key}}").select2();
-        {% elif item.type == 'json' %}
-        const jsonEditor{{ key| title
-    }} = new JSONEditor(document.getElementById("{{key}}"), {
-        mode: 'tree',
-        modes: ['code', 'tree'],
-        onChangeText: function (json) {
-          $('input[name={{key}}]').val(json);
-        }
-    });
-    {% if value[key] %}
-          jsonEditor{{ key| title}}.set({{value[key] | safe}})
-    {% endif %}
-    {% elif item.type in ("image", "file") %}
-    {% endif %}
-    {% endfor %}
+       {%for key in columns if not columns[key].exclude_from_create %}
+          {%set params = columns[key] %}
+          {%set data = value.getlist(key) if (is_form_value and params.is_array) else value[key]%}
+          {% with action='create',name=key,data=data, params=params,label=(key|field_title),error=(errors is none)%}
+          {% include "forms/js/" ~ params.type ~ ".js" ignore missing %}
+          {% endwith %}
+      {%endfor%}
   });
 </script>
 {%endblock%}

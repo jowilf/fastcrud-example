@@ -4,7 +4,7 @@ import re
 from typing import Any, Dict, List, Optional, Type
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response, JSONResponse
-from jinja2 import pass_context
+from jinja2 import ChoiceLoader, FileSystemLoader, pass_context
 from loguru import logger
 from pydantic import BaseModel, ValidationError
 from sqlmodel import Session
@@ -56,6 +56,7 @@ class Admin:
 
     def _create_template(self, title: str):
         template = Jinja2Templates("common/templates")
+        template.env.loader = ChoiceLoader([FileSystemLoader("common/templates")])
         template.env.globals["admin_title"] = title
         template.env.globals["export_config"] = self.export_config
         template.env.globals["all_models"] = self.models
@@ -154,6 +155,7 @@ class Admin:
                         "model": model,
                         "errors": errors,
                         "value": form,
+                        "is_form_value": True,
                     },
                 )
             return RedirectResponse(self.admin_url_for(request, model, "list"))

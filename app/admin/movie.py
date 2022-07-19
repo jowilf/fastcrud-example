@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING, Optional
 
 from common.admin import (DateField, DateTimeField, HasMany, HasOne,
-                          NumberField, StringField, TextField)
+                          NumberField, TagsField, TextAreaField, TextField)
 from pydantic import ValidationError
 from starlette.datastructures import FormData
 from starlette.requests import Request
 
 from app.internal.base_models import BaseAdminModel
-from app.models.movie import Movie, MovieIn
+from app.models.movie import Movie, MovieIn, MoviePatchBody
 from app.utils import pydantic_error_to_form_validation_error
 
 if TYPE_CHECKING:
@@ -18,10 +18,10 @@ class MovieAdmin(BaseAdminModel):
     id = NumberField(
         exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
     )
-    name = StringField(required=True)
-    description = TextField()
+    name = TextField(required=True)
+    description = TextAreaField()
     watch_count = NumberField()
-    tags = StringField(is_array=True)
+    tags = TagsField()
     release_date = DateField()
     created_at = DateTimeField(exclude_from_create=True, exclude_from_edit=True)
     updated_at = DateTimeField(exclude_from_create=True, exclude_from_edit=True)
@@ -68,7 +68,7 @@ class MovieAdmin(BaseAdminModel):
         try:
             _data = self._extract_fields(form_data, True)
             movie = rm.movie.find_by_id(id)
-            movie_in = MovieIn(**_data)
+            movie_in = MoviePatchBody(**_data)
             movie.update(movie_in.dict())
             if _data["preview"] is not None:
                 preview = rm.movie_preview.find_by_id(_data["preview"])

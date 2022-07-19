@@ -8,127 +8,9 @@
     <li class="breadcrumb-item active">{{ model.get_name() }}</li>
   </ol>
 </div>
-{% endblock %} {% block modal %}
-<div
-  class="modal modal-blur fade"
-  id="modal-loading"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-body">
-        <div class="d-flex justify-content-center">
-          <div class="spinner-border text-primary" role="status"></div>
-          <span class="ms-2">Loading...</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<div
-  class="modal modal-blur fade"
-  id="modal-error"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"
-        aria-label="Close"
-      ></button>
-      <div class="modal-status bg-danger"></div>
-      <div class="modal-body text-center py-4">
-        <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon mb-2 text-danger icon-lg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M12 9v2m0 4v.01" />
-          <path
-            d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
-          />
-        </svg>
-        <h3>Something went wrong!</h3>
-        <div id="error-body" class="text-muted"></div>
-      </div>
-    </div>
-  </div>
-</div>
-<div
-  class="modal modal-blur fade"
-  id="modal-delete"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"
-        aria-label="Close"
-      ></button>
-      <div class="modal-status bg-danger"></div>
-      <div class="modal-body text-center py-4">
-        <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon mb-2 text-danger icon-lg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M12 9v2m0 4v.01" />
-          <path
-            d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
-          />
-        </svg>
-        <h3>Are you sure?</h3>
-        <div id="modal-delete-body" class="text-muted">
-          Do you really want to remove <span></span> ? This action cannot be
-          undone.
-        </div>
-      </div>
-      <div class="modal-footer">
-        <div class="w-100">
-          <div class="row">
-            <div class="col">
-              <a href="#" class="btn w-100" data-bs-dismiss="modal">Cancel</a>
-            </div>
-            <div class="col">
-              <div id="modal-delete-btn" href="#" class="btn btn-danger w-100">
-                Delete
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %} {% block content %}
+{% endblock %} {% block modal %} {% include "modals/loading.html" %} {% include
+"modals/error.html" %} {% include "modals/confirm_delete.html" %} {% endblock %}
+{% block content %}
 <div class="container-fluid">
   <div class="row">
     <div class="col-12">
@@ -187,7 +69,6 @@
   type="text/javascript"
   src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/date-1.1.2/r-2.3.0/sb-1.3.4/sl-1.4.0/datatables.min.js"
 ></script>
-{% endblock %} {% block script_end %}
 <script>
   var selectedRows = [];
   var columns = {{model.cols() | tojson | safe}};
@@ -325,7 +206,7 @@
     {%elif item.type in ("datetime", "date", "time")%}
     columns.push({
           data: "{{key}}",
-          searchBuilderType: "moment-{{item.output_format}}",
+          searchBuilderType: "{{item.search_builder_type}}",
           render: function (data, type, full, meta) {
             if (data) {
               if (Array.isArray(data)) {
@@ -344,7 +225,7 @@
     {%elif item.type == "bool"%}
     columns.push({
           data: "{{key}}",
-          searchBuilderType: "{{item.type}}",
+          searchBuilderType: "{{item.search_builder_type}}",
           render: function (data, type, full, meta) {
             if (data == null) return null_column();
             else {
@@ -389,6 +270,7 @@
     {%else%}
     columns.push({
           data: "{{key}}",
+          searchBuilderType: "{{item.search_builder_type}}",
           render: function (data, type, full, meta) {
             if (data) {
               if (Array.isArray(data)) {

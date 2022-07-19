@@ -1,0 +1,3 @@
+{% include "forms/_label.html" %}
+<input id="{{name}}" name="{{name}}" type="number" class="form-control {%if error%}is-invalid{%endif%}"
+    placeholder="{{label}}" value="{{data or '' }}" {%if params.required%}required{%endif%} />

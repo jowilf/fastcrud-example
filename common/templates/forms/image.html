@@ -1,0 +1,4 @@
+{% include "forms/_label.html" %} <input type="file" class="form-control {%if
+error%}is-invalid{%endif%}" id="{{name}}" name="{{name}}" {%if params.is_array%}
+multiple {%endif%} {% if params.type=="image" %} accept="image/*" {%endif%} />
+{%if action=='edit'%} {% include "forms/_keep_old.html" %} {%endif%}

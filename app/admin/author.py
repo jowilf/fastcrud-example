@@ -1,14 +1,14 @@
 from typing import TYPE_CHECKING, Optional
 
 from common.admin import (DateField, DateTimeField, EnumField, HasMany, HasOne,
-                          NumberField, StringField, TimeField)
+                          NumberField, TextField, TimeField)
 from pydantic import ValidationError
 from starlette.datastructures import FormData
 from starlette.requests import Request
 
 from app.internal.base_models import BaseAdminModel
 from app.models import enums
-from app.models.author import Author, AuthorIn
+from app.models.author import Author, AuthorIn, AuthorPatchBody
 from app.utils import pydantic_error_to_form_validation_error
 
 if TYPE_CHECKING:
@@ -19,8 +19,8 @@ class AuthorAdmin(BaseAdminModel):
     id = NumberField(
         exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
     )
-    lastname = StringField(required=True)
-    firstname = StringField(required=True)
+    lastname = TextField(required=True)
+    firstname = TextField(required=True)
     sex = EnumField(type=enums.Gender)
     birthday = DateField()
     wakeup_time = TimeField()
@@ -79,7 +79,7 @@ class AuthorAdmin(BaseAdminModel):
         try:
             _data = self._extract_fields(form_data, True)
             author = rm.author.find_by_id(id)
-            author_in = AuthorIn(**_data)
+            author_in = AuthorPatchBody(**_data)
             author.update(author_in.dict())
             if _data["profile"] is not None:
                 profile = rm.author_profile.find_by_id(_data["profile"])

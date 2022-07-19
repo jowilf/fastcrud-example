@@ -1,0 +1,8 @@
+{% include "forms/_label.html" %}
+{%if params.multiline%}
+<textarea id="{{name}}" name="{{name}}" class="form-control {%if error%}is-invalid{%endif%}" rows="6"
+    placeholder="{{label}}...">{%if data%}{{data}}{%endif%}</textarea>
+{%else%}
+<input id="{{name}}" name="{{name}}" type="{{params.input_type}}" class="form-control {%if error%}is-invalid{%endif%}"
+    placeholder="{{label}}" value="{{data or '' }}" {%if params.required%}required{%endif%} />
+{%endif%}
