@@ -11,6 +11,7 @@ class FieldFilterBase(BaseModel):
 
 class BooleanFilter(FieldFilterBase):
     is_: Optional[bool] = Field(None, alias="is")
+    is_not: Optional[bool] = Field(None)
 
 
 class StringFilter(FieldFilterBase):
@@ -25,6 +26,8 @@ class StringFilter(FieldFilterBase):
     startsWith: Optional[str]
     endsWith: Optional[str]
     neq: Optional[str]
+    is_: Optional[str] = Field(None, alias="is")
+    is_not: Optional[str] = Field(None)
 
 
 class NumberFilter(FieldFilterBase):
@@ -39,6 +42,7 @@ class NumberFilter(FieldFilterBase):
     not_in: Optional[List[float]]
     neq: Optional[float]
     is_: Optional[float] = Field(None, alias="is")
+    is_not: Optional[float] = Field(None)
 
 
 class DateTimeFilter(FieldFilterBase):
@@ -52,6 +56,7 @@ class DateTimeFilter(FieldFilterBase):
     not_in: Optional[List[datetime]]
     neq: Optional[datetime]
     is_: Optional[datetime] = Field(None, alias="is")
+    is_not: Optional[datetime] = Field(None)
 
 
 class TimeFilter(FieldFilterBase):
@@ -65,6 +70,7 @@ class TimeFilter(FieldFilterBase):
     not_in: Optional[List[time]]
     neq: Optional[time]
     is_: Optional[time] = Field(None, alias="is")
+    is_not: Optional[time] = Field(None)
 
 
 class DateFilter(FieldFilterBase):
@@ -78,6 +84,7 @@ class DateFilter(FieldFilterBase):
     not_in: Optional[List[date]]
     neq: Optional[date]
     is_: Optional[date] = Field(None, alias="is")
+    is_not: Optional[date] = Field(None)
 
 
 class HasFilter(FieldFilterBase):

@@ -124,7 +124,7 @@ class AdminModel:
                 fields.append((attr, value))
         return fields
 
-    def dict(self) -> dict:
+    def cols(self) -> dict:
         d = {}
         for name, field in self.all_fields():
             d[name] = field.dict()

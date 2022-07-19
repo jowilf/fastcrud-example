@@ -49,6 +49,8 @@ class SQLAlchemyModelFilter(BaseModelFilter):
                 values.append(p != getattr(field_filter, field))
             if field == "is_":
                 values.append(p.is_(getattr(field_filter, field)))
+            if field == "is_not":
+                values.append(p.is_not(getattr(field_filter, field)))
         if len(values) == 1:
             return values[0]
         return and_(*values)

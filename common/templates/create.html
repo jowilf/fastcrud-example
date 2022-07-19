@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {%set pk = model.pk()%}
-{%set columns= model.dict() %}
+{%set columns= model.cols() %}
 {%if not value%}
 {%set value = {} %}
 {%endif%}

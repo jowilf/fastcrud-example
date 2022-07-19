@@ -49,14 +49,23 @@ class EnumField(StringField):
 
 class DateTimeField(BaseField):
     type: str = "datetime"
+    input_format: Optional[str] = None
+    output_format: str = "MMMM Do, YYYY HH:mm:ss"
+    api_format: Optional[str] = None
 
 
 class DateField(BaseField):
     type: str = "date"
+    input_format: Optional[str] = "YYYY-MM-DD"
+    output_format: str = "MMMM Do, YYYY"
+    api_format: Optional[str] = "YYYY-MM-DD"
 
 
 class TimeField(BaseField):
     type: str = "time"
+    input_format: Optional[str] = "HH:mm:ss"
+    output_format: str = "HH:mm:ss"
+    api_format: Optional[str] = "HH:mm:ss"
 
 
 class JSONField(BaseField):

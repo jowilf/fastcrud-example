@@ -190,6 +190,7 @@
 {% endblock %} {% block script_end %}
 <script>
   var selectedRows = [];
+  var columns = {{model.cols() | tojson | safe}};
   function get_file_icon(mimeType) {
     mapping = {
       image: "fa-file-image",
@@ -275,7 +276,7 @@
         `;
       },
     });
-    {%set columns= model.dict() %}
+    {%set columns= model.cols() %}
     {% for key in columns if not columns[key].exclude_from_list%}
     {%set item = columns[key] %}
     {%if item.type == "image"%}
@@ -304,7 +305,7 @@
               if(data.length == 0 ) return empty_column();
               data.forEach((e) => {
                 cols += `<a href="{{file_url('${e.path}')}}" class="btn-link">
-                  <i class="fa-solid fa-fw ${get_file_icon( e.content_type )}"></i><span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title="${e.filename}" style="max-width: 200px;">${e.filename}</span></a>`;
+                  <i class="fa-solid fa-fw ${get_file_icon( e.content_type )}"></i><span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title="${e.filename}" style="max-width: 30em;">${e.filename}</span></a>`;
               });
               return `<div class="d-flex flex-column">${cols}</div>`;
             } else return null_column();
@@ -315,7 +316,7 @@
           data: "{{key}}",
           render: function (data, type, full, meta) {
             if (data) {
-              return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${JSON.stringify(data)}' style="max-width: 200px;">${pretty_print_json(
+              return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${JSON.stringify(data)}' style="max-width: 30em;">${pretty_print_json(
                 data
               )}</span>`;
             } else return null_column();
@@ -324,17 +325,17 @@
     {%elif item.type in ("datetime", "date", "time")%}
     columns.push({
           data: "{{key}}",
-          searchBuilderType: "{{'moment-MMM DD, YYYY hh:mm A' if (item.type == 'datetime') else( 'moment-LL' if (item.type == 'date') else 'moment-LTS' )}}",
+          searchBuilderType: "moment-{{item.output_format}}",
           render: function (data, type, full, meta) {
             if (data) {
               if (Array.isArray(data)) {
               if(data.length == 0 ) return empty_column();
-                data = data.map((e) => moment(e).format("{{'LLLL' if (item.type == 'datetime') else( 'LL' if (item.type == 'date') else 'LTS' )}}"));
-                return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${JSON.stringify(data)}' style="max-width: 200px;">${pretty_print_json(
+                data = data.map((e) => moment(e{%if item.input_format%},"{{item.input_format}}"{%endif%}).format("{{item.output_format}}"));
+                return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${JSON.stringify(data)}' style="max-width: 30em;">${pretty_print_json(
                   data
                 )}</span>`;
               } else {
-                data = moment(data{{(", 'HH:mm:ss'" if item.type =='time' else "") |safe}}).format("{{'LLLL' if (item.type == 'datetime') else( 'LL' if (item.type == 'date') else 'LTS' )}}");
+                data = moment(data{%if item.input_format%},"{{item.input_format}}"{%endif%}).format("{{item.output_format}}");
                 return `<span>${data}</span>`;
               }
             } else return null_column();
@@ -392,10 +393,10 @@
             if (data) {
               if (Array.isArray(data)) {
                 if(data.length == 0 ) return empty_column();
-                return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${JSON.stringify(data)}' style="max-width: 200px;">${pretty_print_json(
+                return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${JSON.stringify(data)}' style="max-width: 30em;">${pretty_print_json(
                   data
                 )}</span>`;
-              } else return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${data}' style="max-width: 200px;">${data}</span>`;
+              } else return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${data}' style="max-width: 30em;">${data}</span>`;
             } else return null_column();
           },
         });
@@ -502,6 +503,7 @@
         });
         where = {};
         extractCriteria = function (c) {
+          console.log("c",c);
           var d = {};
           if ((c.logic && c.logic == "OR") || c.logic == "AND") {
             d[c.logic.toLowerCase()] = [];
@@ -510,17 +512,15 @@
             });
           } else {
             if (c.type.startsWith("moment-")) {
-              format = c.type.substring(7);
-              if (format == "ll") format = "YYYY-MM-DD";
-              else if (format == "LTS") format = "HH:mm:ss";
-              else format = moment.defaultFormat;
+              api_format = columns[c.data].api_format;
+              if(!api_format) api_format = moment.defaultFormat;
               c.value = [];
               if (c.value1) {
-                c.value1 = moment(c.value1).format(format);
+                c.value1 = moment(c.value1).format(api_format);
                 c.value.push(c.value1);
               }
               if (c.value2) {
-                c.value2 = moment(c.value2).format(format);
+                c.value2 = moment(c.value2).format(api_format);
                 c.value.push(c.value2);
               }
             }
@@ -545,6 +545,8 @@
               cnd["not_like"] = `%${c.value1}%`;
             } else if (c.condition == "null") {
               cnd["is"] = null;
+            } else if (c.condition == "!null") {
+              cnd["is_not"] = null;
             } else if (c_map[c.condition]) {
               cnd[c_map[c.condition]] = c.value1;
             }
