@@ -1,4 +1,3 @@
-{% include "displays/_label.html" %}
 <div class="d-flex flex-row">
     {% for v in (data if params.many else [data]) %}
     {% set foreign_model = (params.identity | to_model)%}

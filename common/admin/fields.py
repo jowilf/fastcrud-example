@@ -72,7 +72,7 @@ class DateTimeField(BaseField):
     output_format: str = "MMMM D, YYYY HH:mm:ss"
     api_format: Optional[str] = None
     search_builder_type: Optional[str] = "moment-MMMM D, YYYY HH:mm:ss"
-    python_output_format: Optional[str] = "%A %d, %Y %H:%M:%S"
+    python_output_format: Optional[str] = "%B %d, %Y %H:%M:%S"
     searchable: Optional[bool] = True
 
 
@@ -82,7 +82,7 @@ class DateField(BaseField):
     output_format: str = "MMMM D, YYYY"
     api_format: Optional[str] = "YYYY-MM-DD"
     search_builder_type: Optional[str] = "moment-MMMM D, YYYY"
-    python_output_format: Optional[str] = "%A %d, %Y"
+    python_output_format: Optional[str] = "%B %d, %Y"
     searchable: Optional[bool] = True
 
 

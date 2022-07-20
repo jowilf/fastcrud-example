@@ -5,4 +5,4 @@ const jsonEditor{{ name | title}} = new JSONEditor(document.getElementById("{{na
         $("input[name={{key}}]").val(json);
         //console.log($("input[name={{key}}]").val(json));
     },
-},{% if data %}{{data|tojson|safe}}{% endif %});
+},{% if data %}{{(data|safe) if is_form_value else (data|tojson|safe)}}{% endif %});

@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="card-body border-bottom py-3">
-            {%for key in columns if not columns[key].exclude_from_create %}
+            {%for key in columns if not columns[key].exclude_from_edit %}
             {%set params = columns[key] %}
             <div class="mb-3">
               {%set data = value.getlist(key) if (is_form_value and

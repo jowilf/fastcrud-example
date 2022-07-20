@@ -1,4 +1,6 @@
-{% extends "layout.html" %} {%set pk = model.pk()%} {% block header %}
+{% extends "layout.html" %} {%set pk = model.pk()%} {% set columns =
+model.cols() %} {% block header %}
+
 <div class="d-flex justify-content-between align-items-center">
   <h1>{{ model.get_name() }}</h1>
   <ol class="breadcrumb">
@@ -46,90 +48,94 @@
           </div>
         </div>
         <div class="card-body">
-          {% set columns= model.cols() %} {% for key in columns if not
-          columns[key].exclude_from_view %} {% set item = value[key] %}
-          <div>
-            <strong>{{ key | title }}</strong>
+          <div class="table-responsive">
+            <table class="table table-bordered table-vcenter table-mobile-md card-table table-hover table-bordered">
+              <thead>
+                <tr>
+                  <th>Attribute</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for key in columns if not columns[key].exclude_from_view %}
+                {% set params = columns[key] %}
+                <tr>
+                  <td data-label="Attribute">
+                    <div>
+                      <strong>{{ key | field_title }}</strong>
+                    </div>
+                  </td>
+                  <td data-label="Value">
+                    {% with name=key,data=value[key],
+                    params=params,label=(key|field_title) %} {% if data ==
+                    None%} {% include "displays/_null.html" %} {%elif
+                    params.is_array and (data |length) ==0%} {% include
+                    "displays/_empty.html" %} {%else%} {% include "displays/" ~
+                    params.type ~ ".html" %} {%endif%} {% endwith %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
-          {% if value[key] == None %}
-          <p class="text-muted">{{"-null-" }}</p>
-          {% elif columns[key].type == "image" %} {% if not
-          columns[key].is_array %} {% set item = [item] %} {% endif %}
-          <div class="d-flex">
-            {% for image in item %}
-            <div class="mx-1 my-2">
-              <img
-                style="width: 5em; height: 5em; object-fit: cover"
-                src="{{ file_url(image.path) }}"
-                class="img-fluid rounded me-3 d-block"
-                alt="{{ image.filename }}"
-              />
-            </div>
-            {% endfor %}
-          </div>
-          {% elif columns[key].type == "file" %} {% if not columns[key].is_array
-          %} {% set item = [item] %} {% endif %}
-          <div class="d-flex flex-column">
-            {% for file in item %}
-            <a href="{{ file_url(file.path) }}" class="btn-link"
-              ><i class="fas fa-fw {{ file.content_type | file_icon }}"></i> {{
-              file.filename }}</a
-            >
-            {% endfor %}
-          </div>
-          {% elif columns[key].type == 'relation' %} {% if not columns[key].many
-          %} {% set item = [item] %} {% endif %} {% if item | length == 0 %}
-          <p class="text-muted">{{"-empty-" }}</p>
-          {% else %}
-          <div class="d-flex flex-row">
-            {% for v in item %} {% set foreign_model = (columns[key].identity |
-            to_model) %}
-            <a
-              class="m-1 btn-link"
-              href="{{ admin_url_for(foreign_model, 'show', v[foreign_model.pk()])}}"
-              class="text-nowrap"
-              ><span class="avatar rounded-circle">{{ v[pk] }}</span></a
-            >
-            {% endfor %}
-          </div>
-          {% endif %} {% elif columns[key].is_array %}
-          <ul>
-            {% for v in item %}
-            <li>{{v }}</li>
-            {% endfor %}
-          </ul>
-          {% else %}
-          <p class="">{{ item.type }} {{ value[key] }}</p>
-          {% endif %} {% endfor %}
+          {% for key in columns if not columns[key].exclude_from_view %} {% set
+          params = columns[key] %}
+          <div class="mb-3"></div>
+          {% endfor %}
         </div>
       </div>
     </div>
   </div>
 </div>
-{% endblock %} {% block script_end %}
-<script>
-  $(function(){
-      $("#modal-delete-btn").click(function(){
-          $("#modal-delete").modal('hide');
-          $("#modal-loading").modal('show');
-          fetch(`{{ ds(model) | safe}}?where=${JSON.stringify({{'{'+pk}}: {{value[pk]}}})}`, {
-              method: "DELETE",
-              headers: {{ajax_headers() | safe}},
-          }).then(async response=>{
-              if(response.ok){
-              await new Promise(r => setTimeout(r, 500));
-                  $("#modal-loading").modal('hide')
-                  window.location.replace("{{ admin_url_for(model)  | safe}}")
-              }
-              else
-                  return Promise.reject();
+{% endblock %} {% block link %} {%if model.need_jsoneditor()%}
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.7.4/jsoneditor.min.css"
+  integrity="sha512-LDaPaKECzpambd6J0xPGx2s/z8EA1rAm3JzmoMgKO0VTRbXHTeE54oDLRw26eFiyBZ3Cf888tBEHzeUTYA3ddw=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
+{%endif%} {% endblock link %} {% block script %} {%if model.need_jsoneditor()%}
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.7.4/jsoneditor.min.js"
+  integrity="sha512-KQaWlVsZF0iPXCR8p176hVrg/rlw+smy8dpJ+vwiuvoHyGr8PTVvaAV4ZmsAYdCvMRP8e3sB9pl1mRuaunaXrg=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
+{%endif%}
 
-          }).catch(async (error) => {
-              await new Promise(r => setTimeout(r, 500));
-              $("#modal-loading").modal('hide')
-              $("#modal-error").modal('show');
-          });
+<script>
+  $(function () {
+
+
+    {%for key in columns if not columns[key].exclude_from_view %}
+      {%set params = columns[key] %}
+      {%set data = value[key]%}
+      {% with name=key,data=data, params=params,label=(key|field_title)%}
+      {% include "displays/js/" ~ params.type ~ ".js" ignore missing %}
+      {% endwith %}
+    {%endfor%}
+
+    $("#modal-delete-btn").click(function () {
+      $("#modal-delete").modal('hide');
+      $("#modal-loading").modal('show');
+      fetch(`{{ ds(model) | safe}}?where=${JSON.stringify({{'{'+pk}}: {{value[pk]}}})}`, {
+        method: "DELETE",
+        headers: ajax_headers() | safe,
+      }).then(async response => {
+        if (response.ok) {
+          await new Promise(r => setTimeout(r, 500));
+          $("#modal-loading").modal('hide')
+          window.location.replace("{{ admin_url_for(model)  | safe}}")
+        } else
+          return Promise.reject();
+
+      }).catch(async (error) => {
+        await new Promise(r => setTimeout(r, 500));
+        $("#modal-loading").modal('hide')
+        $("#modal-error").modal('show');
       });
+    });
   })
 </script>
 {% endblock %}

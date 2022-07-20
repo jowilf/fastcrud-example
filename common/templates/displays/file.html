@@ -1,4 +1,3 @@
-{% include "displays/_label.html" %}
 <div class="d-flex flex-column">
   {% for file in (data if params.is_array else [data]) %}
   <a href="{{ file_url(file.path) }}" class="btn-link"

@@ -1,4 +1,3 @@
-{% include "displays/_label.html" %}
 {%if params.is_array%}
 <ul>
   {% for value in data %}
@@ -6,5 +5,5 @@
   {% endfor %}
 </ul>
 {%else%}
-<p>{{ data }}</p>
+{{ data }}
 {%endif%}

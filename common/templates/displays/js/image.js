@@ -1,1 +1,0 @@
-{%if action=='edit'%} {% include "forms/js/_keep_old.js" %} {%endif%}
