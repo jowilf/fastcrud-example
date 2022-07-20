@@ -96,7 +96,7 @@ $("#modal-delete-btn").click(function () {
   $("#modal-delete").modal("hide");
   $("#modal-loading").modal("show");
   var where = JSON.stringify({
-    pk: { in: table.rows({ selected: true }).ids().toArray() },
+    pk: { in: selectedRows },
   });
   fetch(`{{ ds(model)}}?where=${where}`, {
     method: "DELETE",
