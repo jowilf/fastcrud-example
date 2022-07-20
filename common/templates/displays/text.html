@@ -1,0 +1,10 @@
+{% include "displays/_label.html" %}
+{%if params.is_array%}
+<ul>
+  {% for value in data %}
+  <li>{{value }}</li>
+  {% endfor %}
+</ul>
+{%else%}
+<p>{{ data }}</p>
+{%endif%}

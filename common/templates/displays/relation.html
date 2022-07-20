@@ -1,0 +1,8 @@
+{% include "displays/_label.html" %}
+<div class="d-flex flex-row">
+    {% for v in (data if params.many else [data]) %}
+    {% set foreign_model = (params.identity | to_model)%}
+    <a class="m-1 btn-link" href="{{ admin_url_for(foreign_model, 'show', v[foreign_model.pk()])}}"
+        class="text-nowrap"><span class="avatar rounded-circle">{{ v[model.pk()] }}</span></a>
+    {% endfor %}
+</div>

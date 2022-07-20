@@ -1,0 +1,2 @@
+{%set data = data.strftime(params.python_output_format) if not params.is_array else [v.strftime(params.python_output_format) for v in data]%}
+{% include "displays/text.html" %}

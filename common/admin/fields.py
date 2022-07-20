@@ -18,7 +18,7 @@ class BaseField(BaseModel):
 
 class BooleanField(BaseField):
     type: str = "bool"
-    search_builder_type: Optional[str] = "string"
+    search_builder_type: Optional[str] = "bool"
     searchable: Optional[bool] = True
 
 
@@ -69,16 +69,20 @@ class EnumField(BaseField):
 class DateTimeField(BaseField):
     type: str = "datetime"
     input_format: Optional[str] = None
-    output_format: str = "MMMM Do, YYYY HH:mm:ss"
+    output_format: str = "MMMM D, YYYY HH:mm:ss"
     api_format: Optional[str] = None
+    search_builder_type: Optional[str] = "moment-MMMM D, YYYY HH:mm:ss"
+    python_output_format: Optional[str] = "%A %d, %Y %H:%M:%S"
     searchable: Optional[bool] = True
 
 
 class DateField(BaseField):
     type: str = "date"
     input_format: Optional[str] = "YYYY-MM-DD"
-    output_format: str = "MMMM Do, YYYY"
+    output_format: str = "MMMM D, YYYY"
     api_format: Optional[str] = "YYYY-MM-DD"
+    search_builder_type: Optional[str] = "moment-MMMM D, YYYY"
+    python_output_format: Optional[str] = "%A %d, %Y"
     searchable: Optional[bool] = True
 
 
@@ -87,6 +91,8 @@ class TimeField(BaseField):
     input_format: Optional[str] = "HH:mm:ss"
     output_format: str = "HH:mm:ss"
     api_format: Optional[str] = "HH:mm:ss"
+    search_builder_type: Optional[str] = "moment-HH:mm:ss"
+    python_output_format: Optional[str] = "%H:%M:%S"
     searchable: Optional[bool] = True
 
 

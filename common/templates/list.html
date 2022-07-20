@@ -359,6 +359,50 @@
           config: {
             columns: JSON.parse("{{model.search_columns().keys() | list}}"),
             // enterSearch: true,
+            conditions:{
+              bool: {
+                'false':{
+                  conditionName: 'False',
+                  init: function (a) {
+                    a.s.dt.one("draw.dtsb", function () {
+                      a.s.topGroup.trigger("dtsb-redrawLogic");
+                    });
+                  },
+                  inputValue:function(){},
+                  isInputValid:function(){return!0}
+                },
+                'true':{
+                  conditionName: 'True',
+                  init: function (a) {
+                    a.s.dt.one("draw.dtsb", function () {
+                      a.s.topGroup.trigger("dtsb-redrawLogic");
+                    });
+                  },
+                  inputValue:function(){},
+                  isInputValid:function(){return!0}
+                },
+                'null':{
+                  conditionName: 'Empty',
+                  init: function (a) {
+                    a.s.dt.one("draw.dtsb", function () {
+                      a.s.topGroup.trigger("dtsb-redrawLogic");
+                    });
+                  },
+                  inputValue:function(){},
+                  isInputValid:function(){return!0}
+                },
+                '!null':{
+                  conditionName: 'Not Empty',
+                  init: function (a) {
+                    a.s.dt.one("draw.dtsb", function () {
+                      a.s.topGroup.trigger("dtsb-redrawLogic");
+                    });
+                  },
+                  inputValue:function(){},
+                  isInputValid:function(){return!0}
+                }
+              },
+            },
             greyscale: true,
           },
         },
@@ -429,6 +473,10 @@
               cnd["is"] = null;
             } else if (c.condition == "!null") {
               cnd["is_not"] = null;
+            } else if (c.condition == "false") {
+              cnd["is"] = false;
+            }else if (c.condition == "true") {
+              cnd["is"] = true;
             } else if (c_map[c.condition]) {
               cnd[c_map[c.condition]] = c.value1;
             }
