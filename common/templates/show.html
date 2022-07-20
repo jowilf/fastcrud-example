@@ -59,7 +59,7 @@ model.cols() %} {% block header %}
                 </tr>
               </thead>
               <tbody>
-                {% for key in columns if not columns[key].exclude_from_view %}
+                {% for key in columns if not (columns[key].exclude_from_view or key == pk)%}
                 {% set params = columns[key] %}
                 <tr>
                   <td data-label="Attribute">
@@ -111,7 +111,7 @@ model.cols() %} {% block header %}
     $(function () {
 
 
-      {%for key in columns if not columns[key].exclude_from_view %}
+      {%for key in columns if not (columns[key].exclude_from_view or key == pk) %}
         {%set params = columns[key] %}
         {%set data = value[key]%}
         {% with name=key,data=data, params=params,label=(key|field_title)%}

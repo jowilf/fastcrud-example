@@ -16,9 +16,7 @@ if TYPE_CHECKING:
 
 
 class AuthorProfileAdmin(BaseAdminModel):
-    id = NumberField(
-        exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
-    )
+    id = NumberField(exclude_from_create=True, exclude_from_edit=True)
     file = FileField(required=True)
     info = JSONField()
     protected = BooleanField(required=True)

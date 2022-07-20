@@ -15,9 +15,7 @@ if TYPE_CHECKING:
 
 
 class MovieAdmin(BaseAdminModel):
-    id = NumberField(
-        exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
-    )
+    id = NumberField(exclude_from_create=True, exclude_from_edit=True)
     name = TextField(required=True)
     description = TextAreaField()
     watch_count = NumberField()

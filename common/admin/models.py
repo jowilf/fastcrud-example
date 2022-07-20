@@ -83,7 +83,7 @@ class AdminModel:
                 + len(
                     list(
                         filter(
-                            lambda f: not f[1].exclude_from_list,
+                            lambda f: not f[1].exclude_from_view,
                             self.all_fields(),
                         )
                     )
@@ -92,11 +92,11 @@ class AdminModel:
         )
 
     def search_columns(self) -> Dict[int, str]:
-        columns, i = dict(), 0
+        columns, i = dict(), 2
         for name, field in self.all_fields():
             if (not field.is_array) and field.searchable:
-                columns[i + 2] = name
-            if not field.exclude_from_list:
+                columns[i] = name
+            if not field.exclude_from_view:
                 i += 1
 
         return columns
@@ -109,9 +109,15 @@ class AdminModel:
                 fields.append((attr, value))
         return fields
 
-    def cols(self) -> dict:
+    def cols(self, context: str = "view") -> dict:
         d = {}
         for name, field in self.all_fields():
+            if (
+                (context == "view" and field.exclude_from_view)
+                or (context == "create" and field.exclude_from_create)
+                or (context == "edit" and field.exclude_from_edit)
+            ):
+                continue
             d[name] = field.dict()
         return d
 

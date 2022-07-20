@@ -14,9 +14,7 @@ if TYPE_CHECKING:
 
 
 class ManagerAdmin(BaseAdminModel):
-    id = NumberField(
-        exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
-    )
+    id = NumberField(exclude_from_create=True, exclude_from_edit=True)
     lastname = TextField(required=True)
     firstname = TextField(required=True)
     authors = HasMany(identity="author")

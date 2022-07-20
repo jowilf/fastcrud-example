@@ -20,9 +20,7 @@ if TYPE_CHECKING:
 
 
 class UserAdmin(BaseAdminModel):
-    id = NumberField(
-        exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
-    )
+    id = NumberField(exclude_from_create=True, exclude_from_edit=True)
     username = TextField(required=True)
     phonenumber = PhoneField()
     email = EmailField()

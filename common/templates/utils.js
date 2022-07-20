@@ -57,3 +57,61 @@ function pretty_print_json(data) {
     .replace(/>/g, "&gt;")
     .replace(jsonLine, replacer);
 }
+
+function extractCriteria(c) {
+  console.log("c", c);
+  var d = {};
+  if ((c.logic && c.logic == "OR") || c.logic == "AND") {
+    d[c.logic.toLowerCase()] = [];
+    c.criteria.forEach((v) => {
+      d[c.logic.toLowerCase()].push(extractCriteria(v));
+    });
+  } else {
+    if (c.type.startsWith("moment-")) {
+      api_format = columns[c.data].api_format;
+      if (!api_format) api_format = moment.defaultFormat;
+      c.value = [];
+      if (c.value1) {
+        c.value1 = moment(c.value1).format(api_format);
+        c.value.push(c.value1);
+      }
+      if (c.value2) {
+        c.value2 = moment(c.value2).format(api_format);
+        c.value.push(c.value2);
+      }
+    }
+    cnd = {};
+    c_map = {
+      "=": "eq",
+      ">": "gt",
+      ">=": "ge",
+      "<": "lt",
+      "<=": "le",
+      contains: "contains",
+      starts: "startsWith",
+      ends: "endsWith",
+    };
+    if (c.condition == "between") {
+      cnd["between"] = c.value;
+    } else if (c.condition == "!starts") {
+      cnd["not_like"] = `%${c.value1}`;
+    } else if (c.condition == "!ends") {
+      cnd["not_like"] = `${c.value1}%`;
+    } else if (c.condition == "!contains") {
+      cnd["not_like"] = `%${c.value1}%`;
+    } else if (c.condition == "null") {
+      cnd["is"] = null;
+    } else if (c.condition == "!null") {
+      cnd["is_not"] = null;
+    } else if (c.condition == "false") {
+      cnd["is"] = false;
+    } else if (c.condition == "true") {
+      cnd["is"] = true;
+    } else if (c_map[c.condition]) {
+      cnd[c_map[c.condition]] = c.value1;
+    }
+    d[c.data] = cnd;
+  }
+  return d;
+}
+

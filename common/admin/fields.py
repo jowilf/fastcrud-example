@@ -10,7 +10,6 @@ class BaseField(BaseModel):
     required: Optional[bool] = False
     is_array: Optional[bool] = False
     exclude_from_view: Optional[bool] = False
-    exclude_from_list: Optional[bool] = False
     exclude_from_create: Optional[bool] = False
     exclude_from_edit: Optional[bool] = False
     searchable: Optional[bool] = False
@@ -111,7 +110,6 @@ class ImageField(FileField):
 class PasswordField(TextField):
     type: str = "password"
     exclude_from_view: bool = True
-    exclude_from_list: bool = True
     exclude_from_edit: bool = True
     min_length: int = 8
     max_length: int = 20

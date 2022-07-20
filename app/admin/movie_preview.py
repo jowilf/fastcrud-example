@@ -15,9 +15,7 @@ if TYPE_CHECKING:
 
 
 class MoviePreviewAdmin(BaseAdminModel):
-    id = NumberField(
-        exclude_from_create=True, exclude_from_edit=True, exclude_from_view=True
-    )
+    id = NumberField(exclude_from_create=True, exclude_from_edit=True)
     images = ImageField(is_array=True)
     tags = TagsField()
     movie = HasOne(identity="movie")
