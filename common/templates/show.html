@@ -49,7 +49,9 @@ model.cols() %} {% block header %}
         </div>
         <div class="card-body">
           <div class="table-responsive">
-            <table class="table table-bordered table-vcenter table-mobile-md card-table table-hover table-bordered">
+            <table
+              class="table table-bordered table-vcenter table-mobile-md card-table table-bordered"
+            >
               <thead>
                 <tr>
                   <th>Attribute</th>
@@ -105,37 +107,38 @@ model.cols() %} {% block header %}
 {%endif%}
 
 <script>
-  $(function () {
+  {% include "utils.js" %}
+    $(function () {
 
 
-    {%for key in columns if not columns[key].exclude_from_view %}
-      {%set params = columns[key] %}
-      {%set data = value[key]%}
-      {% with name=key,data=data, params=params,label=(key|field_title)%}
-      {% include "displays/js/" ~ params.type ~ ".js" ignore missing %}
-      {% endwith %}
-    {%endfor%}
+      {%for key in columns if not columns[key].exclude_from_view %}
+        {%set params = columns[key] %}
+        {%set data = value[key]%}
+        {% with name=key,data=data, params=params,label=(key|field_title)%}
+        {% include "displays/js/" ~ params.type ~ ".js" ignore missing %}
+        {% endwith %}
+      {%endfor%}
 
-    $("#modal-delete-btn").click(function () {
-      $("#modal-delete").modal('hide');
-      $("#modal-loading").modal('show');
-      fetch(`{{ ds(model) | safe}}?where=${JSON.stringify({{'{'+pk}}: {{value[pk]}}})}`, {
-        method: "DELETE",
-        headers: ajax_headers() | safe,
-      }).then(async response => {
-        if (response.ok) {
+      $("#modal-delete-btn").click(function () {
+        $("#modal-delete").modal('hide');
+        $("#modal-loading").modal('show');
+        fetch(`{{ ds(model) | safe}}?where=${JSON.stringify({{'{'+pk}}: {{value[pk]}}})}`, {
+          method: "DELETE",
+          headers: ajax_headers() | safe,
+        }).then(async response => {
+          if (response.ok) {
+            await new Promise(r => setTimeout(r, 500));
+            $("#modal-loading").modal('hide')
+            window.location.replace("{{ admin_url_for(model)  | safe}}")
+          } else
+            return Promise.reject();
+
+        }).catch(async (error) => {
           await new Promise(r => setTimeout(r, 500));
           $("#modal-loading").modal('hide')
-          window.location.replace("{{ admin_url_for(model)  | safe}}")
-        } else
-          return Promise.reject();
-
-      }).catch(async (error) => {
-        await new Promise(r => setTimeout(r, 500));
-        $("#modal-loading").modal('hide')
-        $("#modal-error").modal('show');
+          $("#modal-error").modal('show');
+        });
       });
-    });
-  })
+    })
 </script>
 {% endblock %}
