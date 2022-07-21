@@ -147,7 +147,6 @@ class Admin:
             try:
                 form = await request.form()
                 logger.info(form)
-                raise FormValidationError({"info":'invalid'})
                 model.create(request, form)
             except FormValidationError as errors:
                 return self.template.TemplateResponse(
@@ -181,7 +180,6 @@ class Admin:
             try:
                 form = await request.form()
                 logger.info(form)
-                raise FormValidationError({"info":'invalid'})
                 model.edit(request, form, pk)
             except FormValidationError as errors:
                 return self.template.TemplateResponse(

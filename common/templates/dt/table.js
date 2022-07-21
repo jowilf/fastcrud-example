@@ -5,7 +5,7 @@ var table = $("#dt").DataTable({
   searching: false,
   info: true,
   colReorder: true,
-  //responsive: true,
+  // responsive: true,
   serverSide: true,
   scrollX: true,
   lengthMenu: [
@@ -66,7 +66,7 @@ var table = $("#dt").DataTable({
       },
     });
   },
-  columns: get_columns(),
+  columns: dt_columns,
   order: [[2, "asc"]],
 });
 

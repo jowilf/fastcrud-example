@@ -60,7 +60,6 @@ model.cols() %} {% block header %}
               </thead>
               <tbody>
                 {% for key in columns if not (columns[key].exclude_from_view or key == pk)%}
-                {% set params = columns[key] %}
                 <tr>
                   <td data-label="Attribute">
                     <div>
@@ -69,7 +68,7 @@ model.cols() %} {% block header %}
                   </td>
                   <td data-label="Value">
                     {% with name=key,data=value[key],
-                    params=params,label=(key|field_title) %} {% if data ==
+                    params=columns[key],label=(key|field_title) %} {% if data ==
                     None%} {% include "displays/_null.html" %} {%elif
                     params.is_array and (data |length) ==0%} {% include
                     "displays/_empty.html" %} {%else%} {% include "displays/" ~

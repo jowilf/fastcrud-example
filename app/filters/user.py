@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import List, Optional, Set, Union
 
-from common.filters import DateTimeFilter, NumberFilter, StringFilter
+from common.filters import (BooleanFilter, DateTimeFilter, NumberFilter,
+                            StringFilter)
 from common.types import PhoneNumber
 from fastapi import Query
 from pydantic import EmailStr, Field
@@ -26,6 +27,7 @@ class UserFilter(BaseModelFilter):
     email: Union[None, StringFilter, EmailStr]
     password: Union[None, StringFilter, str]
     date_joined: Union[None, DateTimeFilter, datetime]
+    is_superuser: Union[None, BooleanFilter, bool]
     or_: Optional[List["UserFilter"]] = Field(None, alias="or")
     and_: Optional[List["UserFilter"]] = Field(None, alias="and")
     not_: Optional["UserFilter"] = Field(None, alias="not")

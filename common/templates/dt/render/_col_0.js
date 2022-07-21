@@ -1,4 +1,4 @@
-a = {
+dt_columns.push({
   data: null,
   orderable: false,
   render: function (data, type, full, meta) {
@@ -7,4 +7,4 @@ a = {
       full.DT_RowId
     }" class="form-check-input" type="checkbox" ${is_check ? "checked" : ""}>`;
   },
-};
+});

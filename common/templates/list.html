@@ -84,171 +84,18 @@
         $("#table-header").append(`<th>${key}</th>`);
       });
       {% include "dt/buttons.js" %}
-
-      function get_columns() {
-        var columns = [];
-        columns.push({
-          data: null,
-          orderable: false,
-          render: function (data, type, full, meta) {
-            var is_check = selectedRows.indexOf(full.DT_RowId+'')>-1;
-            return `<input data-id="${full.DT_RowId}" class="form-check-input" type="checkbox" ${is_check ? "checked": ""}>`;
-          }
-        })
-        columns.push({
-          data: null,
-          orderable: false,
-          render: function (data, type, full, meta) {
-            // return '<a href="#"><i class="fa-solid fa-eye"></i></a>'
-            return `
-            <div class="d-flex">
-            <a href="{{ admin_url_for(model, 'show', '${full.DT_RowId}')}}" data-bs-toggle="tooltip" data-bs-placement="top" title="View">
-                    <span class="me-1"><i class="fa-solid fa-eye"></i></span>
-              </a>
-              <a href="{{ admin_url_for(model, 'edit', '${full.DT_RowId}') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
-                    <span class="me-1"><i class="fa-solid fa-edit"></i></span>
-              </a><div>
-            `;
-          },
-        });
-        {% for key in columns if not columns[key].exclude_from_view%}
-        {%set item = columns[key] %}
-        {%if item.type == "image"%}
-        columns.push({
-              data: "{{key}}",
-              render: function (data, type, full, meta) {
-                if (data) {
-                  if (!Array.isArray(data)) data = [data];
-                  cols = "";
-                  if(data.length == 0 ) return empty_column();
-                  data.forEach((e) => {
-                    cols+=`<div class="p-1"><span class="avatar avatar-sm" style="background-image: url({{file_url('${e.path}')}})"></span></div>`;
-                    //cols += `<div class="p-1"><img style="width: 3em;height:3em;object-fit: cover;"  src="{{request.base_url}}medias/${e.path}" class="img-fluid rounded" alt="${e.filename}"></div>`;
-                  });
-                  return `<div class="d-flex">${cols}</div>`;
-                } else return null_column();
-              },
-            });
-        {%elif item.type == "file"%}
-        columns.push({
-              data: "{{key}}",
-              render: function (data, type, full, meta) {
-                if (data) {
-                  if (!Array.isArray(data)) data = [data];
-                  cols = "";
-                  if(data.length == 0 ) return empty_column();
-                  data.forEach((e) => {
-                    cols += `<a href="{{file_url('${e.path}')}}" class="btn-link">
-                      <i class="fa-solid fa-fw ${get_file_icon( e.content_type )}"></i><span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title="${e.filename}" style="max-width: 30em;">${e.filename}</span></a>`;
-                  });
-                  return `<div class="d-flex flex-column">${cols}</div>`;
-                } else return null_column();
-              },
-            });
-        {%elif item.type == "json"%}
-        columns.push({
-              data: "{{key}}",
-              render: function (data, type, full, meta) {
-                if (data) {
-                  return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${JSON.stringify(data)}' style="max-width: 30em;">${pretty_print_json(
-                    data
-                  )}</span>`;
-                } else return null_column();
-              },
-            });
-        {%elif item.type in ("datetime", "date", "time")%}
-        columns.push({
-              data: "{{key}}",
-              searchBuilderType: "{{item.search_builder_type}}",
-              render: function (data, type, full, meta) {
-                if (data) {
-                  if (Array.isArray(data)) {
-                  if(data.length == 0 ) return empty_column();
-                    data = data.map((e) => moment(e{%if item.input_format%},"{{item.input_format}}"{%endif%}).format("{{item.output_format}}"));
-                    return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${JSON.stringify(data)}' style="max-width: 30em;">${pretty_print_json(
-                      data
-                    )}</span>`;
-                  } else {
-                    data = moment(data{%if item.input_format%},"{{item.input_format}}"{%endif%}).format("{{item.output_format}}");
-                    return `<span>${data}</span>`;
-                  }
-                } else return null_column();
-              },
-            });
-        {%elif item.type == "bool"%}
-        columns.push({
-              data: "{{key}}",
-              searchBuilderType: "{{item.search_builder_type}}",
-              render: function (data, type, full, meta) {
-                console.log('render',type,data);
-                if (data == null) return null_column();
-                else {
-                  if(type == 'display'){
-                  if (!Array.isArray(data)) {
-                    data = [data];
-                  }
-                  cols = "";
-                  if(data.length == 0 ) return empty_column();
-                  data.forEach((e) => {
-                    if (e)
-                      cols += `<span class="text-center text-success me-1">
-                                        <i class="fa-solid fa-check-circle fa-lg"></i>
-                                    </span>`;
-                    else
-                      cols += `<span class="text-center text-danger me-1">
-                                        <i class="fa-solid fa-times-circle fa-lg"></i>
-                                      </span>`;
-                  });
-                  return `<div class="d-flex flex-row">${cols}</div>`;
-                  }
-                  return data;
-                }
-              },
-            });
-        {%elif item.type == "relation"%}
-        {%set foreign_model = (item.identity | to_model)%}
-        columns.push({
-              data: "{{key}}",
-              orderable: false,
-              render: function (data, type, full, meta) {
-                if (data) {
-                  if(Array.isArray(data)){
-                      if(data.length == 0 ) return empty_column();
-                      cols = "";
-                      data.forEach((e) => {
-                          cols += `<a class='mx-1 btn-link' href="{{ admin_url_for(foreign_model, 'show', '${e.'+foreign_model.pk()+'}') }}"><span class='avatar rounded-circle'>${e.{{foreign_model.pk()}}}</span></a>`;
-                    });
-                    return `<div class="d-flex flex-row">${cols}</div>`;
-                  }
-                  return `<a class='btn-link' href="{{ admin_url_for(foreign_model, 'show', '${data.'+foreign_model.pk()+'}') }}"><span class='avatar rounded-circle'>${data.{{foreign_model.pk()}}}</span></a>`;
-                } else return null_column();
-              },
-            });
-        {%else%}
-        columns.push({
-              data: "{{key}}",
-              searchBuilderType: "{{item.search_builder_type}}",
-              render: function (data, type, full, meta) {
-                if (data) {
-                  if (Array.isArray(data)) {
-                    if(data.length == 0 ) return empty_column();
-                    return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${JSON.stringify(data)}' style="max-width: 30em;">${pretty_print_json(
-                      data
-                    )}</span>`;
-                  } else return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${data}' style="max-width: 30em;">${data}</span>`;
-                } else return null_column();
-              },
-            });
-        {%endif%}
-        {%endfor%}
-        return columns;
-      }
-
-
-        {% include "dt/table.js" %}
-
-
-        $('[data-toggle="tooltip"]').tooltip()
+      
+      dt_columns = [];
+      {% include "dt/render/_col_0.js" %}
+      {% include "dt/render/_col_1.js" %}
+      {%for key in columns if not columns[key].exclude_from_view%}
+      {% with name=key,params=columns[key] %}
+      {% include "dt/render/" ~ params.type ~ ".js" %}
+      {% endwith %}
+      {%endfor%}
+      console.log(dt_columns);
+      {% include "dt/table.js" %}
+      $('[data-toggle="tooltip"]').tooltip()
 
   });
 </script>
