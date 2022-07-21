@@ -110,6 +110,9 @@ class Admin:
             {"request": request, "code": code},
         )
 
+    async def _render_forbidden(self, request: Request):
+        return self.template.TemplateResponse("forbidden.html", {"request": request})
+
     async def _404(self, request: Request) -> Response:
         return await self._render_error(request, "404")
 
@@ -208,26 +211,25 @@ class Admin:
     async def render_dashboard(
         self, request: Request, model_identity: str, action: Optional[str], pk: Any
     ) -> Response:
-        try:
-            model = self._find_model_from_identity(model_identity)
-            if model is not None:
-                if action == "list":
-                    return await self._list(request, model)
-                elif action == "show":
-                    return await self._show(request, model, pk)
-                elif action == "create":
-                    return await self._create(request, model)
-                elif action == "edit":
-                    return await self._edit(request, model, pk)
-            return await self._404(request)
-        except ValidationError as exc:
-            return JSONResponse(
-                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-                content={"detail": exc.errors()},
-            )
-        # except Exception as e:
-        #     logger.exception(e)
-        #     return await self._render_error(request, "500")
+        model = self._find_model_from_identity(model_identity)
+        if model is not None:
+            if action == "list":
+                if not model.can_view(request):
+                    return await self._render_forbidden(request)
+                return await self._list(request, model)
+            elif action == "show":
+                if not model.can_view(request):
+                    return await self._render_forbidden(request)
+                return await self._show(request, model, pk)
+            elif action == "create":
+                if not model.can_create(request):
+                    return await self._render_forbidden(request)
+                return await self._create(request, model)
+            elif action == "edit":
+                if not model.can_edit(request):
+                    return await self._render_forbidden(request)
+                return await self._edit(request, model, pk)
+        return await self._404(request)
 
 
 # b64encode(b"username:password").decode("ascii")

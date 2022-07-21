@@ -83,6 +83,7 @@ function extractCriteria(c) {
     cnd = {};
     c_map = {
       "=": "eq",
+      "!=": "neq",
       ">": "gt",
       ">=": "ge",
       "<": "lt",
@@ -93,10 +94,14 @@ function extractCriteria(c) {
     };
     if (c.condition == "between") {
       cnd["between"] = c.value;
-    } else if (c.condition == "!starts") {
-      cnd["not_like"] = `%${c.value1}`;
-    } else if (c.condition == "!ends") {
+    }
+    else if (c.condition == "!between") {
+      cnd["not_between"] = c.value;
+    }
+    else if (c.condition == "!starts") {
       cnd["not_like"] = `${c.value1}%`;
+    } else if (c.condition == "!ends") {
+      cnd["not_like"] = `%${c.value1}`;
     } else if (c.condition == "!contains") {
       cnd["not_like"] = `%${c.value1}%`;
     } else if (c.condition == "null") {
@@ -114,4 +119,3 @@ function extractCriteria(c) {
   }
   return d;
 }
-

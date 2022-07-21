@@ -27,10 +27,10 @@
       </h1>
       <div class="collapse navbar-collapse" id="navbar-menu">
         <ul class="navbar-nav pt-lg-3">
-          {% for _m in all_models %}
+          {% for _m in all_models  if _m.can_view(request) %}
           <li class="nav-item">
             <a
-              class="nav-link {% if _m.identity() == model.identity() %}active fw-bold{% endif %}"
+              class="nav-link {% if model and _m.identity() == model.identity() %}active fw-bold{% endif %}"
               href="{{ admin_url_for(_m) }}"
             >
               <span class="nav-link-title">{{ _m.get_name() }}</span>

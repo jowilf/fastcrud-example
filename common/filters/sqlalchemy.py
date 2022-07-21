@@ -18,23 +18,25 @@ class SQLAlchemyModelFilter(BaseModelFilter):
         for field in field_filter.__fields_set__:
             if field == "eq":
                 values.append(p == getattr(field_filter, field))
-            if field == "ge":
+            elif field == "ge":
                 values.append(p >= getattr(field_filter, field))
-            if field == "gt":
+            elif field == "gt":
                 values.append(p > getattr(field_filter, field))
-            if field == "between":
+            elif field == "between":
                 values.append(p.between(*getattr(field_filter, field)))
+            elif field == "not_between":
+                values.append(not_(p.between(*getattr(field_filter, field))))
             elif field == "le":
                 values.append(p <= getattr(field_filter, field))
             elif field == "lt":
                 values.append(p < getattr(field_filter, field))
-            if field == "like":
+            elif field == "like":
                 values.append(p.like(getattr(field_filter, field)))
-            if field == "not_like":
+            elif field == "not_like":
                 values.append(p.not_like(getattr(field_filter, field)))
-            if field == "ilike":
+            elif field == "ilike":
                 values.append(p.ilike(getattr(field_filter, field)))
-            if field == "not_ilike":
+            elif field == "not_ilike":
                 values.append(p.not_ilike(getattr(field_filter, field)))
             elif field == "in_":
                 values.append(p.in_(getattr(field_filter, field)))
@@ -48,9 +50,9 @@ class SQLAlchemyModelFilter(BaseModelFilter):
                 values.append(p.endswith(getattr(field_filter, field)))
             elif field == "neq":
                 values.append(p != getattr(field_filter, field))
-            if field == "is_":
+            elif field == "is_":
                 values.append(p.is_(getattr(field_filter, field)))
-            if field == "is_not":
+            elif field == "is_not":
                 values.append(p.is_not(getattr(field_filter, field)))
         if len(values) == 1:
             return values[0]

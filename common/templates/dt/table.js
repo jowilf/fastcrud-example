@@ -72,55 +72,56 @@ var table = $("#dt").DataTable({
 });
 
 table.buttons().container().appendTo("#dt_wrapper");
+if (can_delete) {
+  table
+    .on("select", function (e, dt, type, indexes) {
+      var rowData = table.rows(indexes).data().toArray();
+      selectedRows = table.rows({ selected: true }).ids().toArray();
+      console.log("select", selectedRows);
+      if (table.rows({ selected: true }).count() == 0)
+        $("#multi-delete-btn").hide();
+      else $("#multi-delete-btn").show();
+      $("#multi-delete-btn span").text(table.rows({ selected: true }).count());
+    })
+    .on("deselect", function (e, dt, type, indexes) {
+      var rowData = table.rows(indexes).data().toArray();
+      selectedRows = table.rows({ selected: true }).ids().toArray();
+      console.log("deselect ", selectedRows);
+      if (table.rows({ selected: true }).count() == 0)
+        $("#multi-delete-btn").hide();
+      else $("#multi-delete-btn").show();
+      $("#multi-delete-btn span").text(table.rows({ selected: true }).count());
+    });
 
-table
-  .on("select", function (e, dt, type, indexes) {
-    var rowData = table.rows(indexes).data().toArray();
-    selectedRows = table.rows({ selected: true }).ids().toArray();
-    console.log("select", selectedRows);
-    if (table.rows({ selected: true }).count() == 0)
-      $("#multi-delete-btn").hide();
-    else $("#multi-delete-btn").show();
-    $("#multi-delete-btn span").text(table.rows({ selected: true }).count());
-  })
-  .on("deselect", function (e, dt, type, indexes) {
-    var rowData = table.rows(indexes).data().toArray();
-    selectedRows = table.rows({ selected: true }).ids().toArray();
-    console.log("deselect ", selectedRows);
-    if (table.rows({ selected: true }).count() == 0)
-      $("#multi-delete-btn").hide();
-    else $("#multi-delete-btn").show();
-    $("#multi-delete-btn span").text(table.rows({ selected: true }).count());
-  });
-
-$("#modal-delete-btn").click(function () {
-  $("#modal-delete").modal("hide");
-  $("#modal-loading").modal("show");
-  var where = JSON.stringify({
-    [pk]: { in: selectedRows },
-  });
-  fetch(`{{ ds(model)}}?where=${where}`, {
-    method: "DELETE",
-    headers: JSON.parse(`{{ajax_headers() | tojson | safe}}`),
-  })
-    .then(async (response) => {
-      if (response.ok) {
+  $("#modal-delete-btn").click(function () {
+    $("#modal-delete").modal("hide");
+    $("#modal-loading").modal("show");
+    var where = JSON.stringify({
+      [pk]: { in: selectedRows },
+    });
+    fetch(`{{ ds(model)}}?where=${where}`, {
+      method: "DELETE",
+      headers: JSON.parse(`{{ajax_headers() | tojson | safe}}`),
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          await new Promise((r) => setTimeout(r, 500));
+          $("#modal-loading").modal("hide");
+          table.ajax.reload();
+          $("#multi-delete-btn").hide();
+        } else return Promise.reject();
+      })
+      .catch(async (error) => {
         await new Promise((r) => setTimeout(r, 500));
         $("#modal-loading").modal("hide");
-        table.ajax.reload();
-        $("#multi-delete-btn").hide();
-      } else return Promise.reject();
-    })
-    .catch(async (error) => {
-      await new Promise((r) => setTimeout(r, 500));
-      $("#modal-loading").modal("hide");
-      $("#modal-error").modal("show");
-    });
-});
+        $("#modal-error").modal("show");
+      });
+  });
 
-$("#multi-delete-btn").click(function () {
-  $("#modal-delete-body span").text(
-    table.rows({ selected: true }).count() + " {{model.get_name()}}"
-  );
-  $("#modal-delete").modal("show");
-});
+  $("#multi-delete-btn").click(function () {
+    $("#modal-delete-body span").text(
+      table.rows({ selected: true }).count() + " {{model.get_name()}}"
+    );
+    $("#modal-delete").modal("show");
+  });
+}

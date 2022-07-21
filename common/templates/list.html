@@ -1,4 +1,4 @@
-{% extends "layout.html" %} {%set columns= model.cols() %} {% block header %}
+{% extends "layout.html" %} {% block header %}
 <div class="d-flex justify-content-between align-items-center">
   <h1>{{ model.get_name() }}</h1>
   <ol class="breadcrumb">
@@ -28,6 +28,7 @@
                   <i class="fa-solid fa-trash me-2"></i>
                   (<span>0</span>)
                 </button>
+                {%if model.can_create(request)%}
                 <a
                   href="{{ admin_url_for(model, 'create')}}"
                   class="btn btn-primary btn-block ms-2"
@@ -35,6 +36,7 @@
                   <i class="fa-solid fa-plus me-2"></i>
                   New {{ model.get_name() }}
                 </a>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -74,17 +76,19 @@
 ></script>
 <script>
   $(function () {
+      {%set columns= model.cols() %} 
       {% include "dt/utils.js" %}
       var selectedRows = [];
       var columns = JSON.parse(`{{model.cols() | tojson | safe}}`);
       var exportConfig = JSON.parse(`{{export_config.dict() | tojson | safe}}`)
       var pk = '{{model.pk()}}';
-      console.log(columns);
+      var can_delete = {{model.can_delete(request) | tojson}}
+      var can_edit = {{model.can_edit(request) | tojson}}
       Object.keys(columns).forEach((key) => {
         $("#table-header").append(`<th>${key}</th>`);
       });
       {% include "dt/buttons.js" %}
-      
+
       dt_columns = [];
       {% include "dt/render/_col_0.js" %}
       {% include "dt/render/_col_1.js" %}

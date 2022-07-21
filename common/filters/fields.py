@@ -38,6 +38,7 @@ class NumberFilter(FieldFilterBase):
     lt: Optional[float]
     contains: Optional[str]
     between: Optional[List[float]] = Field(None, max_items=2, min_items=2)
+    not_between: Optional[List[float]] = Field(None, max_items=2, min_items=2)
     in_: Optional[List[float]] = Field(None, alias="in")
     not_in: Optional[List[float]]
     neq: Optional[float]
@@ -52,6 +53,7 @@ class DateTimeFilter(FieldFilterBase):
     le: Optional[datetime]
     lt: Optional[datetime]
     between: Optional[List[datetime]] = Field(None, max_items=2, min_items=2)
+    not_between: Optional[List[datetime]] = Field(None, max_items=2, min_items=2)
     in_: Optional[List[datetime]] = Field(None, alias="in")
     not_in: Optional[List[datetime]]
     neq: Optional[datetime]
@@ -66,6 +68,7 @@ class TimeFilter(FieldFilterBase):
     le: Optional[time]
     lt: Optional[time]
     between: Optional[List[time]] = Field(None, max_items=2, min_items=2)
+    not_between: Optional[List[time]] = Field(None, max_items=2, min_items=2)
     in_: Optional[List[time]] = Field(None, alias="in")
     not_in: Optional[List[time]]
     neq: Optional[time]
@@ -80,6 +83,7 @@ class DateFilter(FieldFilterBase):
     le: Optional[date]
     lt: Optional[date]
     between: Optional[List[date]] = Field(None, max_items=2, min_items=2)
+    not_between: Optional[List[date]] = Field(None, max_items=2, min_items=2)
     in_: Optional[List[date]] = Field(None, alias="in")
     not_in: Optional[List[date]]
     neq: Optional[date]
