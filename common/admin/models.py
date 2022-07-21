@@ -67,13 +67,13 @@ class AdminModel:
         return True
 
     def can_edit(self, request: Request) -> bool:
-        return False
+        return True
 
     def can_create(self, request: Request) -> bool:
-        return False
+        return True
 
     def can_delete(self, request: Request) -> bool:
-        return False
+        return True
 
     def _export_columns(self) -> List[int]:
         return list(
