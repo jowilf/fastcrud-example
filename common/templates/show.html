@@ -59,7 +59,8 @@ model.cols() %} {% block header %}
                 </tr>
               </thead>
               <tbody>
-                {% for key in columns if not (columns[key].exclude_from_view or key == pk)%}
+                {% for key in columns if not (columns[key].exclude_from_view or
+                key == pk)%}
                 <tr>
                   <td data-label="Attribute">
                     <div>
@@ -88,56 +89,55 @@ model.cols() %} {% block header %}
     </div>
   </div>
 </div>
-{% endblock %} {% block link %} {%if model.need_jsoneditor()%}
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.7.4/jsoneditor.min.css"
-  integrity="sha512-LDaPaKECzpambd6J0xPGx2s/z8EA1rAm3JzmoMgKO0VTRbXHTeE54oDLRw26eFiyBZ3Cf888tBEHzeUTYA3ddw=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-/>
-{%endif%} {% endblock link %} {% block script %} {%if model.need_jsoneditor()%}
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.7.4/jsoneditor.min.js"
-  integrity="sha512-KQaWlVsZF0iPXCR8p176hVrg/rlw+smy8dpJ+vwiuvoHyGr8PTVvaAV4ZmsAYdCvMRP8e3sB9pl1mRuaunaXrg=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-></script>
+{% endblock %} {% block script %} {%if model.need_jsoneditor()%}
+<script>
+  function pretty_print_json(data) {
+    var jsonLine = /^( *)("[\w]+": )?("[^"]*"|[\w.+-]*)?([,[{])?$/gm;
+    var replacer = function (match, pIndent, pKey, pVal, pEnd) {
+      var key = '<span class="json-key" style="color: brown">',
+        val = '<span class="json-value" style="color: navy">',
+        str = '<span class="json-string" style="color: olive">',
+        r = pIndent || "";
+      if (pKey) r = r + key + pKey.replace(/[": ]/g, "") + "</span>: ";
+      if (pVal) r = r + (pVal[0] == '"' ? str : val) + pVal + "</span>";
+      return r + (pEnd || "");
+    };
+  }
+</script>
 {%endif%}
 
 <script>
-  {% include "utils.js" %}
-    $(function () {
+  $(function () {
 
 
-      {%for key in columns if not (columns[key].exclude_from_view or key == pk) %}
-        {%set params = columns[key] %}
-        {%set data = value[key]%}
-        {% with name=key,data=data, params=params,label=(key|field_title)%}
-        {% include "displays/js/" ~ params.type ~ ".js" ignore missing %}
-        {% endwith %}
-      {%endfor%}
+    {%for key in columns if not (columns[key].exclude_from_view or key == pk) %}
+      {%set params = columns[key] %}
+      {%set data = value[key]%}
+      {% with name=key,data=data, params=params,label=(key|field_title)%}
+      {% include "displays/js/" ~ params.type ~ ".js" ignore missing %}
+      {% endwith %}
+    {%endfor%}
 
-      $("#modal-delete-btn").click(function () {
-        $("#modal-delete").modal('hide');
-        $("#modal-loading").modal('show');
-        fetch(`{{ ds(model) | safe}}?where=${JSON.stringify({{'{'+pk}}: {{value[pk]}}})}`, {
-          method: "DELETE",
-          headers: ajax_headers() | safe,
-        }).then(async response => {
-          if (response.ok) {
-            await new Promise(r => setTimeout(r, 500));
-            $("#modal-loading").modal('hide')
-            window.location.replace("{{ admin_url_for(model)  | safe}}")
-          } else
-            return Promise.reject();
-
-        }).catch(async (error) => {
+    $("#modal-delete-btn").click(function () {
+      $("#modal-delete").modal('hide');
+      $("#modal-loading").modal('show');
+      fetch(`{{ ds(model) | safe}}?where=${JSON.stringify({{'{'+pk}}: {{value[pk]}}})}`, {
+        method: "DELETE",
+        headers: ajax_headers() | safe,
+      }).then(async response => {
+        if (response.ok) {
           await new Promise(r => setTimeout(r, 500));
           $("#modal-loading").modal('hide')
-          $("#modal-error").modal('show');
-        });
+          window.location.replace("{{ admin_url_for(model)  | safe}}")
+        } else
+          return Promise.reject();
+
+      }).catch(async (error) => {
+        await new Promise(r => setTimeout(r, 500));
+        $("#modal-loading").modal('hide')
+        $("#modal-error").modal('show');
       });
-    })
+    });
+  })
 </script>
 {% endblock %}

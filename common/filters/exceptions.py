@@ -1,0 +1,2 @@
+class InvalidQueryArgs(Exception):
+    pass

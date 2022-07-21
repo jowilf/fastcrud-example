@@ -1,3 +1,4 @@
+from common.filters.exceptions import InvalidQueryArgs
 from depot.manager import DepotManager
 from fastapi import Depends, FastAPI, HTTPException, Path, Request
 from fastapi.exception_handlers import request_validation_exception_handler
@@ -6,7 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from pydantic import ValidationError
 from starlette.responses import FileResponse, HTMLResponse, JSONResponse
-from starlette.status import HTTP_404_NOT_FOUND
+from starlette.status import (HTTP_404_NOT_FOUND,
+                              HTTP_422_UNPROCESSABLE_ENTITY,
+                              HTTP_500_INTERNAL_SERVER_ERROR)
 from starlette.templating import Jinja2Templates
 
 from app.config import config
@@ -93,7 +96,17 @@ async def validation_exception_handler(request, exc):
     )
 
 
+@app.exception_handler(InvalidQueryArgs)
+async def value_error_exception_handler(request, exc: InvalidQueryArgs):
+    return JSONResponse(
+        dict(detail="Invalid query"), status_code=HTTP_422_UNPROCESSABLE_ENTITY
+    )
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     logger.exception(exc)
-    return JSONResponse(dict(detail="An unknown error occurred."), status_code=500)
+    return JSONResponse(
+        dict(detail="An unknown error occurred."),
+        status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+    )

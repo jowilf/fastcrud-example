@@ -74,7 +74,7 @@
 ></script>
 <script>
   $(function () {
-      {% include "utils.js" %}
+      {% include "dt/utils.js" %}
       var selectedRows = [];
       var columns = JSON.parse(`{{model.cols() | tojson | safe}}`);
       var exportConfig = JSON.parse(`{{export_config.dict() | tojson | safe}}`)

@@ -6,6 +6,7 @@ from datetime import date, datetime, time
 from typing import List, Optional, Type
 
 from common.filters.base import BaseModelFilter
+from common.filters.exceptions import InvalidQueryArgs
 from common.filters.fields import AnyFilter, FieldFilterBase, HasFilter
 
 
@@ -57,6 +58,8 @@ class SQLAlchemyModelFilter(BaseModelFilter):
 
     def to_query(self):
         filters = []
+        if len(self.__fields_set__) == 0:
+            raise InvalidQueryArgs("Invalid query")
         for field in self.__fields_set__:
             attr = getattr(self, field)
             if field == "or_":

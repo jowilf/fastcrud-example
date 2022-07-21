@@ -36,21 +36,22 @@ var table = $("#dt").DataTable({
       const { column, dir } = o;
       order.push(`${data.columns[column].data} ${dir}`);
     });
-    where = {};
+    where = null;
     if (data.searchBuilder && !jQuery.isEmptyObject(data.searchBuilder)) {
       where = extractCriteria(data.searchBuilder);
       console.log(where);
     }
+    query = {
+      skip: settings._iDisplayStart,
+      limit: settings._iDisplayLength,
+      order_by: order,
+    };
+    if (where) query.where = JSON.stringify(where);
     $.ajax({
       url: "{{ ds(model)}}",
       type: "get",
       headers: JSON.parse(`{{ajax_headers() | tojson | safe}}`),
-      data: {
-        skip: settings._iDisplayStart,
-        limit: settings._iDisplayLength,
-        where: JSON.stringify(where),
-        order_by: order,
-      },
+      data: query,
       traditional: true,
       dataType: "json",
       success: function (data, status, xhr) {
@@ -96,7 +97,7 @@ $("#modal-delete-btn").click(function () {
   $("#modal-delete").modal("hide");
   $("#modal-loading").modal("show");
   var where = JSON.stringify({
-    pk: { in: selectedRows },
+    [pk]: { in: selectedRows },
   });
   fetch(`{{ ds(model)}}?where=${where}`, {
     method: "DELETE",
