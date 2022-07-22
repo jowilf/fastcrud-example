@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class LoginBody(BaseModel):
-    username: str
+    username: str = Field(..., min_length=3)
     password: str
 
 
