@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from common.admin import AdminModel
 from common.types import FileInfo
+from sf_admin import AdminModel
 from sqlalchemy import MetaData
 from sqlmodel import Field, SQLModel
 from starlette.datastructures import FormData, UploadFile

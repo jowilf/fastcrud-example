@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
-from common.admin import HasOne, ImageField, NumberField, TagsField
 from pydantic import ValidationError
+from sf_admin import HasOne, ImageField, NumberField, TagsField
 from starlette.datastructures import FormData
 from starlette.requests import Request
 

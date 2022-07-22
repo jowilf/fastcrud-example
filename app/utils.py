@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional, Tuple, Type
 
-from common.admin.exceptions import FormValidationError
 from pydantic import ValidationError
+from sf_admin.exceptions import FormValidationError
 from sqlmodel import SQLModel
 from sqlmodel.main import SQLModelMetaclass
 

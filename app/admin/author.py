@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Optional
 
-from common.admin import (DateField, DateTimeField, EnumField, HasMany, HasOne,
-                          NumberField, TextField, TimeField)
 from pydantic import ValidationError
+from sf_admin import (DateField, DateTimeField, EnumField, HasMany, HasOne,
+                      NumberField, TextField, TimeField)
 from starlette.datastructures import FormData
 from starlette.requests import Request
 

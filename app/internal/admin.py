@@ -1,11 +1,11 @@
 import urllib.parse
 from typing import Dict, Optional
 
-from common.admin import Admin as BaseAdmin
 from fastapi import Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from jose import JWTError
 from pydantic import ValidationError
+from sf_admin import Admin as BaseAdmin
 
 from app.admin.author import AuthorAdmin
 from app.admin.author_profile import AuthorProfileAdmin

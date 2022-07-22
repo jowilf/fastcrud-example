@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING, Optional
 
-from common.admin import (BooleanField, DateTimeField, EmailField, NumberField,
-                          PasswordField, PhoneField, TagsField, TextField)
-from common.admin.exceptions import FormValidationError
 from fastapi import HTTPException
 from pydantic import ValidationError
+from sf_admin import (BooleanField, DateTimeField, EmailField, NumberField,
+                      PasswordField, PhoneField, TagsField, TextField)
+from sf_admin.exceptions import FormValidationError
 from starlette.datastructures import FormData
 from starlette.requests import Request
 from starlette.status import HTTP_409_CONFLICT

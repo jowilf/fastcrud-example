@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Optional
 
-from common.admin import (HasMany, HasOne, ImageField, NumberField,
-                          TextAreaField, TextField)
 from pydantic import ValidationError
+from sf_admin import (HasMany, HasOne, ImageField, NumberField, TextAreaField,
+                      TextField)
 from starlette.datastructures import FormData
 from starlette.requests import Request
 

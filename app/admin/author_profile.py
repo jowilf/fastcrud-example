@@ -1,8 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
-from common.admin import (BooleanField, FileField, HasOne, JSONField,
-                          NumberField)
 from pydantic import ValidationError
+from sf_admin import BooleanField, FileField, HasOne, JSONField, NumberField
 from starlette.datastructures import FormData
 from starlette.requests import Request
 

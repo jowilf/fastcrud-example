@@ -7,7 +7,7 @@ authors = ["Your Name <you@example.com>"]
 [tool.poetry.dependencies]
 python = "^3.8"
 sqlmodel = "^0.0.6"
-fastapi = "^0.78.0"
+fastapi = "^0.79.0"
 SQLAlchemy-Utils = "^0.38.2"
 alembic = {extras = ["tz"], version = "^1.8.0"}
 uvicorn = "^0.17.6"
@@ -25,9 +25,12 @@ ariadne = "^0.15.0"
 passlib = "^1.7.4"
 python-jose = "^3.3.0"
 SQLAlchemy = "1.4.35"
+sf-admin = {path = "../../PycharmProjects/sf-admin"}
 
 
 [tool.poetry.dev-dependencies]
+black = "^22.6.0"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
