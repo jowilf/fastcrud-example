@@ -5,7 +5,7 @@ from common.types import FileInfo
 
 from app.config import config
 from app.graphql.error import format_error
-from app.graphql.resolvers.auth import login, me, refresh_token, register
+from app.graphql.resolvers.auth import me, register
 from app.graphql.resolvers.author import (create_author, delete_authors,
                                           get_authors, get_one_author,
                                           patch_author, update_author)
@@ -40,8 +40,6 @@ mutation = MutationType()
 
 mutation.set_field("Auth_me", me)
 mutation.set_field("Auth_register", register)
-mutation.set_field("Auth_login", login)
-mutation.set_field("Auth_refreshToken", refresh_token)
 
 
 query.set_field("Movie", get_movies)

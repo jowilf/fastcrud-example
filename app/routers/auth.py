@@ -3,7 +3,6 @@ from starlette.status import HTTP_201_CREATED
 
 from app.dependencies import repository_manager
 from app.internal.repository_manager import RepositoryManager
-from app.models.auth import LoginBody, TokenResponse
 from app.models.user import UserOut, UserRegister
 from app.services.auth import authorize
 
@@ -32,17 +31,3 @@ async def register_new_user(
     user_in: UserRegister, repository: RepositoryManager = Depends(repository_manager)
 ):
     return repository.user.create(user_in)
-
-
-@router.post("/login", name="auth:login", response_model=TokenResponse)
-async def login(
-    body: LoginBody, repository: RepositoryManager = Depends(repository_manager)
-):
-    return repository.user.login(body)
-
-
-@router.post("/refresh", name="auth:refresh_token", response_model=TokenResponse)
-async def refresh_token(
-    refresh_token: str, repository: RepositoryManager = Depends(repository_manager)
-):
-    return repository.user.refresh_token(refresh_token)

@@ -164,6 +164,7 @@ async def delete_movie_preview(
 async def get_movie(
     id: int = Path(...),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:view"])),
 ):
     movie_preview = repository.movie_preview.find_by_id(id)
     if movie_preview.movie is None:

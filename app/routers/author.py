@@ -17,6 +17,8 @@ from app.models.author import (Author, AuthorIn, AuthorInBase, AuthorOut,
 from app.models.author_profile import AuthorProfileOutWithoutRelations
 from app.models.manager import ManagerOutWithoutRelations
 from app.models.movie import Movie, MovieInBase, MovieOutWithoutRelations
+from app.models.user import User
+from app.services.auth import authorize
 
 router = APIRouter(prefix="/api/authors", tags=["authors-controller"])
 
@@ -227,6 +229,7 @@ async def get_movies(
     order_by: MovieOrderBy = Depends(),
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
+    user: User = Depends(authorize(["movie:view"])),
 ):
     where = MovieFilter.from_query(request)
     if where is None:
