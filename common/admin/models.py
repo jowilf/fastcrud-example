@@ -2,7 +2,7 @@ from abc import abstractmethod
 import inspect
 import json
 from typing import Any, Dict, List, Tuple
-from fastapi import Request
+from starlette.requests import Request
 
 from loguru import logger
 from common.admin.exceptions import FormValidationError
