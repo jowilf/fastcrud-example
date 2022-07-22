@@ -75,22 +75,6 @@ class AdminModel:
     def can_delete(self, request: Request) -> bool:
         return True
 
-    def _export_columns(self) -> List[int]:
-        return list(
-            range(
-                2,
-                2
-                + len(
-                    list(
-                        filter(
-                            lambda f: not f[1].exclude_from_view,
-                            self.all_fields(),
-                        )
-                    )
-                ),
-            )
-        )
-
     def search_columns(self) -> Dict[int, str]:
         columns, i = dict(), 2
         for name, field in self.all_fields():
@@ -159,7 +143,7 @@ class AdminModel:
         logger.info(data)
         return data
 
-    def item_to_dict(self, value) -> Dict[str, str]:
+    def item_to_select2_dict(self, value) -> Dict[str, str]:
         data = dict()
         for name in self.search_columns().values():
             data[name] = str(getattr(value, name))
@@ -173,7 +157,7 @@ class AdminModel:
             items = [self.find_by_pk(request, pk)]
         datas = []
         for item in items:
-            data = self.item_to_dict(item)
+            data = self.item_to_select2_dict(item)
             data["selected"] = True
             datas.append(data)
         return datas
