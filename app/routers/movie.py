@@ -35,7 +35,6 @@ async def list_all(
     order_by: MovieOrderBy = Depends(),
     pagination: PaginationQuery = Depends(),
     repository: RepositoryManager = Depends(repository_manager),
-    user: User = Depends(authorize(["movie:view"])),
 ):
     total = repository.movie.find_all(
         pagination, MovieFilter.from_query(request), order_by, True
@@ -53,7 +52,6 @@ async def get_by_id(
     id: int = Path(...),
     exclude: Set[str] = Query({}),
     repository: RepositoryManager = Depends(repository_manager),
-    user: User = Depends(authorize(["movie:view"])),
 ):
     return repository.movie.find_by_id(id)
 
